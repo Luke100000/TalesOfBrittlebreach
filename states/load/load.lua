@@ -20,4 +20,6 @@ io.stdout:setvbuf("no")
 dream = require("3DreamEngine")
 dream:loadMaterialLibrary("materials")
 
+dream:init()
+
 require("states/load/data")

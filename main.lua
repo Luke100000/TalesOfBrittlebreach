@@ -109,6 +109,8 @@ function love.resize(w, h)
 	if states[state].resize then
 		states[state]:resize(w, h)
 	end
+	
+	dream:resize()
 end
 
 function love.quit(crashed)
