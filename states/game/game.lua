@@ -1,30 +1,26 @@
 states.game = { }
 
-model = dream:loadObject("objects/Running")
+require("states/game/entities")
+
+love.mouse.setRelativeMode(true)
+
 world = dream:loadScene("objects/world")
 
 cameraController = require("states/game/cameraController")
 
-local player = {
-	ax = 0,
-	ay = 0,
-	az = 0,
-	x = 0,
-	y = 0,
-	z = 0,
-	rx = 0,
-	ry = 0,
-}
-
 function states.game:switch()
+	self.entities = { }
 	
+	self.player = self:newEntity("player", 3, -1, 0)
 end
 
 function states.game:draw()
 	cameraController:setCamera(dream.cam)
 	
 	dream:prepare()
-	dream:draw(model)
+	
+	self:drawEntities()
+	
 	dream:draw(world)
 	dream:present()
 end
@@ -35,4 +31,6 @@ end
 
 function states.game:update(dt)
 	cameraController:update(dt)
+	
+	self:updateEntities(dt)
 end
