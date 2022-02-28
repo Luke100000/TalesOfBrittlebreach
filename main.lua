@@ -97,6 +97,13 @@ function love.wheelmoved(x, y)
 	mousewheel_button = y
 end
 
+function love.mousemoved(x, y, dx, dy)
+	if states[state].mousemoved then
+		states[state]:mousemoved(x, y, dx, dy)
+	end
+	mousewheel_button = y
+end
+
 function love.textinput(text)
 	if states[state].textinput then
 		states[state]:textinput(text)

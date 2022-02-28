@@ -14,4 +14,8 @@ function e:update(dt)
 	
 end
 
+function e:control(dt)
+	
+end
+
 return e

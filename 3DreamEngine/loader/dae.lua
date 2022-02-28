@@ -14,13 +14,28 @@ end
 local function loadVecArray(arr, stride)
 	local t = { }
 	local i = stride
+	local i2 = 0
 	for w in arr:gmatch("%S+") do
 		i = i + 1
 		if i > stride then
-			table.insert(t, { })
+			if stride == 2 then
+				table.insert(t, vec2())
+			elseif stride == 3 then
+				table.insert(t, vec3())
+			elseif stride == 4 then
+				table.insert(t, vec4())
+			elseif stride == 9 then
+				table.insert(t, mat3())
+			elseif stride == 16 then
+				table.insert(t, mat4())
+			else
+				table.insert(t, { })
+			end
 			i = 1
+			i2 = 1
 		end
-		table.insert(t[#t], tonumber(w))
+		t[#t][i2] = tonumber(w)
+		i2 = i2 + 1
 	end
 	return t
 end

@@ -22,4 +22,6 @@ dream:loadMaterialLibrary("materials")
 
 dream:init()
 
+physics = require("extensions/physics")
+
 require("states/load/data")
