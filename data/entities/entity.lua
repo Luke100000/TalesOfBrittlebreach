@@ -1,9 +1,7 @@
 local e = { }
 
-function e:new(x, y, z)
-	self.x = x
-	self.y = y
-	self.z = z
+function e:new(position)
+	self.position = position
 end
 
 function e:draw()

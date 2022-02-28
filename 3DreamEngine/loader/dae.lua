@@ -173,6 +173,13 @@ return function(self, obj, path)
 	
 	--parse
 	local file = love.filesystem.read(path)
+	
+	--compressed (50 4B 03 04 magic number)
+	local magic = {string.byte(file, 1, 4)}
+	if magic[1] == 80 and magic[2] == 75 and magic[3] == 3 and magic[4] == 4 then
+		error("PKZIP not supported, please unzip the .dae first")
+	end
+	
 	xml2lua.parser(handler):parse(file)
 	
 	local correction = mat4:getRotateX(-math.pi/2)
@@ -200,11 +207,7 @@ return function(self, obj, path)
 				local data = loadInputs(skin.joints[1])
 				c.jointNames = data.JOINT[1]
 				
-				local m = data.INV_BIND_MATRIX[1]
-				c.inverseBindMatrices = { }
-				for i,v in ipairs(m) do
-					c.inverseBindMatrices[i] = mat4(v)
-				end
+				c.inverseBindMatrices = data.INV_BIND_MATRIX[1]
 				
 				--load data
 				local data = loadInputs(skin.vertex_weights[1])
@@ -456,7 +459,9 @@ return function(self, obj, path)
 				
 				--get matrices
 				local id = a.channel[1]._attr.target
-				local name = indices[id:sub(1, -11)] and indices[id:sub(1, -11)]._attr.sid
+				id = id:gsub("/matrix", "")
+				id = id:gsub("/transform", "")
+				local name = indices[id] and indices[id]._attr.sid
 				assert(name, "animation output channel refers to unknown id " .. id)
 				animation.frames[name] = { }
 				for i = 1, #sources.OUTPUT / 16 do
@@ -472,16 +477,13 @@ return function(self, obj, path)
 		
 		animation:finish()
 		if animation.length > 0 then
-			obj.animations[anim._attr.name or anim._attr.id] = animation
+			local name = anim._attr and (anim._attr.name or anim._attr.id) or "Default"
+			obj.animations[name] = animation
 		end
 	end
 	
 	--load animations
 	for _,animations in ipairs(root.library_animations or { }) do
-		for _,animation in ipairs(animations.animation or { }) do
-			if animation.animation then
-				loadAnimation(animation)
-			end
-		end
+		loadAnimation(animations)
 	end
 end

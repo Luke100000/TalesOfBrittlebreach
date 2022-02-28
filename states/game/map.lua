@@ -24,7 +24,7 @@ function states.game:drawMap()
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.translate(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
 	love.graphics.scale(10)
-	love.graphics.translate(-self.player.x, -self.player.z)
+	love.graphics.translate(-self.player.position.x, -self.player.position.z)
 	love.graphics.setLineWidth(1/16)
 	love.graphics.setLineJoin("none")
 	

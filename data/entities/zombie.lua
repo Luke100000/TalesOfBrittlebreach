@@ -17,7 +17,7 @@ end
 
 function e:draw()
 	local pose = (e.anim.animations.Default or e.anim.animations.Armature):getPose(love.timer.getTime())
-	e.model.meshes.Cube.material:setColor(1, 0, 0)
+	e.model.meshes.Cube.material:setColor(0, 1, 0)
 	e.model.meshes.Cube.material:setMetallic(1)
 	e.model.meshes.Cube.material:setRoughness(0)
 	e.model:applyPose(pose)
@@ -30,51 +30,17 @@ end
 
 function e:update(dt)
 	self.position = self.collider:getPosition()
-end
-
-function e:control(dt)
-	local d = love.keyboard.isDown
-	local speed = 0.01
-	local rot = 0
 	
 	local cx, cy = self.collider:getVelocity()
 	if cx^2 + cy^2 > 1 then
 		self.rot = math.atan2(cy, cx)
 	end
 	
-	if d("w") then
-		self.collider:applyForce(
-			math.cos(rot) * speed,
-			math.sin(rot) * speed
-		)
+	local delta = states.game.player.position - self.position
+	if delta:lengthSquared() > 2.0 then
+		local direction = delta:normalize() * 0.01
+	self.collider:applyForce(direction.x, direction.z)
 	end
-	if d("d") then
-		self.collider:applyForce(
-			math.cos(rot+math.pi/2) * speed,
-			math.sin(rot+math.pi/2) * speed
-		)
-	end
-	if d("s") then
-		self.collider:applyForce(
-			math.cos(rot+math.pi) * speed,
-			math.sin(rot+math.pi) * speed
-		)
-	end
-	if d("a") then
-		self.collider:applyForce(
-			math.cos(rot-math.pi/2) * speed,
-			math.sin(rot-math.pi/2) * speed
-		)
-	end
-	
-	local tilt = 0.3
-	local distance = 6
-	local direction = vec3(-math.cos(rot) * tilt, 1, -math.sin(rot) * tilt)
-	direction = direction:normalize() * distance
-	
-	dream.cam:setTransform(
-		dream:lookAt(self.position + direction, self.position):invert()
-	)
 end
 
 return e

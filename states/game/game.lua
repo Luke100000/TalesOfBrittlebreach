@@ -7,6 +7,11 @@ world = dream:loadScene("objects/world")
 
 cameraController = require("states/game/cameraController")
 
+sun = dream:newLight("sun", vec3(1, 1, 1), vec3(1, 1, 1), 1)
+sun:addShadow()
+
+dream:setSky(love.graphics.newImage("textures/hdri.jpg"))
+
 function states.game:switch()
 	--setup physics world
 	self.physicsWorld = physics:newWorld()
@@ -15,6 +20,8 @@ function states.game:switch()
 	self.entities = { }
 	
 	self.player = self:newEntity("player", 3, 5, 0)
+	
+	self:newEntity("zombie", 10, 5, 0)
 	
 	self.freeFly = false
 end
@@ -25,6 +32,8 @@ function states.game:draw()
 	end
 	
 	dream:prepare()
+	
+	dream:addLight(sun)
 	
 	self:drawEntities()
 	
