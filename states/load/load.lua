@@ -25,3 +25,12 @@ dream:init()
 physics = require("extensions/physics")
 
 require("states/load/data")
+
+data.animations = { }
+for d,s in ipairs(love.filesystem.getDirectoryItems("objects/animations")) do
+	if s:sub(-4) == ".dae" then
+		local name = s:sub(1, -5)
+		local o = dream:loadObject("objects/animations/" .. name)
+		data.animations[name] = o.animations.Default or o.animations.Armature
+	end
+end

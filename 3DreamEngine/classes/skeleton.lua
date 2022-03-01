@@ -51,7 +51,7 @@ function class:applyPoseToNode(nodes, pose, parentTransform)
 			poseTransform[12] = pos[3]
 			self.transforms[name] = parentTransform and parentTransform * poseTransform or poseTransform
 		else
-			self.transforms[name] = parentTransform
+			self.transforms[name] = parentTransform and (parentTransform * joint.transform) or joint.transform
 		end
 		
 		if joint.children then

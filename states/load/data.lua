@@ -37,7 +37,8 @@ function loadPackage(package)
 			if ok then
 				if b then
 					local p = files[fid]
-					data[package][p:sub(1, #p-4)] = b
+					b.name = p:sub(1, #p-4)
+					data[package][b.name] = b
 					
 					table.remove(coroutines, fid)
 					table.remove(files, fid)

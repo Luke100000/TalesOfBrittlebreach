@@ -5,9 +5,6 @@ e.model = dream:loadObject("objects/player", {callback = function(model)
 end})
 e.model:print()
 
-e.anim = dream:loadObject("objects/animations/run")
-e.anim:print()
-
 function e:new(position)
 	e.super.new(self, position)
 	
@@ -18,7 +15,7 @@ function e:new(position)
 end
 
 function e:draw()
-	local pose = (e.anim.animations.Default or e.anim.animations.Armature):getPose(love.timer.getTime())
+	local pose = data.animations.walkPlayer:getPose(love.timer.getTime())
 	e.model.meshes.Cube.material:setColor(1, 0, 0)
 	e.model.meshes.Cube.material:setMetallic(1)
 	e.model.meshes.Cube.material:setRoughness(0.5)
