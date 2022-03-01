@@ -3,15 +3,13 @@ local e = extend("entity")
 e.model = dream:loadObject("objects/player", {callback = function(model)
 	model:setVertexShader("bones")
 end})
-e.model:print()
 
 e.anim = dream:loadObject("objects/animations/run")
-e.anim:print()
 
 function e:new(position)
 	e.super.new(self, position)
 	
-	self.collider =  states.game.physicsWorld:add(physics:newCircle(0.25, 1.75), "dynamic", position.x, position.y, position.z)
+	self.collider = states.game.physicsWorld:add(physics:newCircle(0.25, 1.75), "dynamic", position.x, position.y, position.z)
 	self.rot = 0
 end
 

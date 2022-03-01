@@ -52,3 +52,4 @@ end
 data = { }
 
 loadPackage("entities")
+loadPackage("bullets")

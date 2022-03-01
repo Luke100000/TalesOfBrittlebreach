@@ -1,7 +1,7 @@
-function states.game:newEntity(typ, x, y, z)
+function states.game:newEntity(typ, position)
 	local dat = data.entities[typ]
 	local e = setmetatable({ },	{__index = dat})
-	e:new(vec3(x, y, z))
+	e:new(position)
 	table.insert(self.entities, e)
 	return e
 end
