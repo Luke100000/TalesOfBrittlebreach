@@ -26,6 +26,8 @@ function e:draw()
 	e.model:rotateY(self.rot - math.pi/2)
 	e.model:translate(self.position)
 	dream:draw(e.model)
+	
+	e.super.draw(self)
 end
 
 function e:update(dt)
@@ -38,11 +40,11 @@ function e:update(dt)
 	end
 	
 	if self.path == nil then
-		--states.game:requestPath("zombie", self.position.x, self.position.z, states.game.player.position.x, states.game.player.position.z)
-		states.game:requestPath("zombie", self.position.x, self.position.z)
+		--states.game:requestPath(self.id, self.position.x, self.position.z, states.game.player.position.x, states.game.player.position.z)
+		states.game:requestPath(self.id, self.position.x, self.position.z, false, false, 256)
 		self.path = false
 	elseif not self.path then
-		self.path = states.game:fetchRaytracerResult("zombie") or false
+		self.path = states.game:fetchRaytracerResult(self.id) or false
 		self.errorTime = 0
 	elseif self.path then
 		if #self.path > 1 then
@@ -59,7 +61,7 @@ function e:update(dt)
 			
 			if self.collider.collided then
 				self.errorTime = self.errorTime + dt
-				if self.errorTime > 0.5 then
+				if self.errorTime > 0.1 then
 					states.game:markPath(node[3], node[4], 1)
 					self.path = nil
 					self.errorTime = 0
@@ -71,6 +73,8 @@ function e:update(dt)
 			self.path = nil
 		end
 	end
+	
+	return e.super.update(self, dt)
 end
 
 return e

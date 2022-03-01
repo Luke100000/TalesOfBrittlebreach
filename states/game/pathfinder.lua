@@ -19,14 +19,14 @@ function states.game:fetchPath(id)
 	end
 end
 
-function states.game:requestPath(id, x, y, tx, ty)
+function states.game:requestPath(id, x, y, tx, ty, maxTransitions)
 	if type(id) == "function" then
 		lastID = lastID + 1
 		local cbid = "callback_" .. lastID
 		self.pathfinderCallbacks[cbid] = id
-		inputChannel:push({"find", cbid, x, y, tx, ty})
+		inputChannel:push({"find", cbid, x, y, tx, ty, maxTransitions})
 	else
-		inputChannel:push({"find", id, x, y, tx, ty})
+		inputChannel:push({"find", id, x, y, tx, ty, maxTransitions})
 	end
 end
 

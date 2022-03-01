@@ -1,6 +1,7 @@
 function states.game:newBullet(typ, ...)
 	local dat = data.bullets[typ]
 	local e = setmetatable({ },	{__index = dat})
+	e.id = states.game:getId()
 	e:new(...)
 	table.insert(self.bullets, e)
 	return e

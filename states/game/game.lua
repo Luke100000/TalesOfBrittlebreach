@@ -16,6 +16,12 @@ sun:addShadow()
 
 dream:setSky(love.graphics.newImage("textures/hdri.jpg"))
 
+local lastId = 0
+function states.game:getId()
+	lastId = lastId + 1
+	return lastId
+end
+
 function states.game:switch()
 	--setup physics world
 	self.physicsWorld = physics:newWorld()
@@ -60,20 +66,20 @@ function states.game:draw()
 	love.graphics.line(x - c, y - s, x + c, y - s)
 	love.graphics.line(x - c, y + s, x + c, y + s)
 	
-	local path = self.entities[2].path
-	if path then
-		local positions = { }
-		for d,s in ipairs(path) do
-			local pixel = dream.cam.transformProj * vec3(s[1], 0, s[2])
-			pixel = (pixel / pixel.z + 1.0) / 2 * vec3(screen.w, screen.h, self.player.position.y)
-			table.insert(positions, pixel.x)
-			table.insert(positions, pixel.y)
-		end
-		if #positions > 2 then
-			love.graphics.setLineWidth(2)
-			love.graphics.line(positions)
-		end
-	end
+--	local path = self.entities[2].path
+--	if path then
+--		local positions = { }
+--		for d,s in ipairs(path) do
+--			local pixel = dream.cam.transformProj * vec3(s[1], 0, s[2])
+--			pixel = (pixel / pixel.z + 1.0) / 2 * vec3(screen.w, screen.h, self.player.position.y)
+--			table.insert(positions, pixel.x)
+--			table.insert(positions, pixel.y)
+--		end
+--		if #positions > 2 then
+--			love.graphics.setLineWidth(2)
+--			love.graphics.line(positions)
+--		end
+--	end
 end
 
 function states.game:mousemoved(_, _, x, y)
@@ -84,6 +90,10 @@ end
 
 function states.game:update(dt)
 	dt = math.min(1 / 15, dt)
+	
+	if love.keyboard.isDown("b") then
+		dt = dt * 0.1
+	end
 	
 	if self.freeFly then
 		cameraController:update(dt)
@@ -104,17 +114,15 @@ function states.game:update(dt)
 end
 
 function states.game:mousepressed(x, y, b)
-	local nx = x / screen.w * 2 - 1
-	local ny = y / screen.h * 2 - 1
-	local direction = dream:pixelToPoint(vec3(x, y, 1000)) - dream.cam.pos
-	
-	self:requestRaytrace(
-		function(task)
-			if task.pos then
-				self:newBullet("musket", self.player.position, (task.pos - self.player.position):normalize())
-			end
-		end,
-		dream.cam.pos, direction)
+	local entity = states.game:findNearestEntity(self.player.position, function(s) return s ~= self.player end)
+	local direction = vec3(
+		screen.h / 2 - y,
+		0,
+		x - screen.w / 2
+	)
+	direction = direction:normalize()
+	direction[2] = (entity and entity.position.y or self.player.position.y) - self.player.position.y
+	self:newBullet("musket", self.player.position + vec3(0, 0.8, 0), direction:normalize(), self.player)
 end
 
 function states.game:keypressed(key)

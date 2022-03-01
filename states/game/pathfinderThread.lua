@@ -63,7 +63,7 @@ local function getNodeAt(x, y)
 	return nodeTable[gx] and nodeTable[gx][gy]
 end
 
-local function findPath(x, y, tx, ty)
+local function findPath(x, y, tx, ty, maxTransitions)
 	--find initial node
 	local node = getNodeAt(x, y)
 	if not node then
@@ -79,7 +79,7 @@ local function findPath(x, y, tx, ty)
 	local best = {[node] = 1}
 	local backtrace = { }
 	local transitions = 0
-	while bucketIndex <= totalBuckets do
+	while bucketIndex <= totalBuckets and (not maxTransitions or transitions < maxTransitions) do
 		local node = todo[bucketIndex] and todo[bucketIndex][entryIndex]
 		
 		--spread

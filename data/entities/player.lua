@@ -26,10 +26,14 @@ function e:draw()
 	e.model:rotateY(self.rot - math.pi/2)
 	e.model:translate(self.position)
 	dream:draw(e.model)
+	
+	e.super.draw(self)
 end
 
 function e:update(dt)
 	self.position = self.collider:getPosition()
+	
+	return e.super.update(self, dt)
 end
 
 function e:control(dt)

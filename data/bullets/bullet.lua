@@ -1,8 +1,9 @@
 local e = { }
 
-function e:new(position, direction)
+function e:new(position, direction, shooter)
 	self.position = position
 	self.direction = direction
+	self.shooter = shooter
 end
 
 function e:draw()
