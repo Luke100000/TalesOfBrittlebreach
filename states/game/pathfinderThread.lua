@@ -23,8 +23,8 @@ local function init(x1, y1, x2, y2, resolution)
 		nodeTable[x] = { }
 		for y = 1, h do
 			local n = {
-				x = (x / w) * (x2 - x1) + x1,
-				y = (y / h) * (y2 - y1) + y1,
+				x = (x / w) * (x2 - x1) + x1 + (math.random() - 0.5) * 0.25,
+				y = (y / h) * (y2 - y1) + y1 + (math.random() - 0.5) * 0.25,
 				id = #nodes + 1,
 				weights = { },
 				marks = { },

@@ -13,13 +13,15 @@ function e:new(position)
 	
 	self.collider = states.game.physicsWorld:add(physics:newCircle(0.25, 1.75), "dynamic", position.x, position.y, position.z)
 	self.rot = 0
+	
+	self.cameraDistance = 5
 end
 
 function e:draw()
 	local pose = (e.anim.animations.Default or e.anim.animations.Armature):getPose(love.timer.getTime())
 	e.model.meshes.Cube.material:setColor(1, 0, 0)
 	e.model.meshes.Cube.material:setMetallic(1)
-	e.model.meshes.Cube.material:setRoughness(0)
+	e.model.meshes.Cube.material:setRoughness(0.5)
 	e.model:applyPose(pose)
 	e.model:reset()
 	e.model:scale(1 / 100)
@@ -71,13 +73,31 @@ function e:control(dt)
 		)
 	end
 	
+	--camera
 	local tilt = 0.3
-	local distance = 6
-	local direction = vec3(-math.cos(rot) * tilt, 1, -math.sin(rot) * tilt)
-	direction = direction:normalize() * distance
+	local distance = 5
+	local safetyMargin = 1
+	local headPosition = self.position + vec3(0, 1, 0)
+	local direction = vec3(-math.cos(rot) * tilt, 1, -math.sin(rot) * tilt):normalize()
+	local cameraRay = direction * (distance + safetyMargin)
 	
+	--request colliison check
+	states.game:requestRaytrace("camera", headPosition, cameraRay)
+	local pos = states.game.raytracerResults["camera"]
+	if pos and pos.pos then
+		distance = math.max(1, (pos.pos - headPosition):length() - safetyMargin)
+	end
+	
+	--adapt distance
+	if self.cameraDistance > distance + safetyMargin then
+		self.cameraDistance = distance
+	else
+		self.cameraDistance = self.cameraDistance * (1 - dt) + distance * dt
+	end
+	
+	--set camera
 	dream.cam:setTransform(
-		dream:lookAt(self.position + direction, self.position):invert()
+		dream:lookAt(headPosition + direction * distance, headPosition):invert()
 	)
 end
 

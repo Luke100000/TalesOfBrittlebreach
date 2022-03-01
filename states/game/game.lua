@@ -32,7 +32,7 @@ function states.game:switch()
 	
 	self.player = self:newEntity("player", vec3(3, 5, 0))
 	
-	self:newEntity("zombie", vec3(10, 5, 0))
+	self:newEntity("zombie", vec3(8, 5, 0))
 	
 	self.freeFly = false
 end
@@ -107,6 +107,12 @@ function states.game:update(dt)
 	self:updateEntities(dt)
 	self:updateRaytracer()
 	self:updatePathfinder()
+	
+	if #self.entities < 10 then
+		if math.random() < dt * 0.25 then
+			self:newEntity("zombie", vec3(8, 5, 0))
+		end
+	end
 	
 	dream.delton:start("physics")
 	self.physicsWorld:update(dt)

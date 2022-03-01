@@ -13,13 +13,14 @@ function e:new(position)
 	self.rot = 0
 	
 	self.errorTime = 0
+	self.pathFindCooldown = 0
 end
 
 function e:draw()
 	local pose = (e.anim.animations.Default or e.anim.animations.Armature):getPose(love.timer.getTime())
 	e.model.meshes.Cube.material:setColor(0, 1, 0)
 	e.model.meshes.Cube.material:setMetallic(1)
-	e.model.meshes.Cube.material:setRoughness(0)
+	e.model.meshes.Cube.material:setRoughness(0.5)
 	e.model:applyPose(pose)
 	e.model:reset()
 	e.model:scale(1 / 100)
@@ -39,20 +40,30 @@ function e:update(dt)
 		self.rot = math.atan2(cy, cx)
 	end
 	
-	if self.path == nil then
-		--states.game:requestPath(self.id, self.position.x, self.position.z, states.game.player.position.x, states.game.player.position.z)
-		states.game:requestPath(self.id, self.position.x, self.position.z, false, false, 256)
-		self.path = false
-	elseif not self.path then
+	--request path
+	if self.path ~= false then
+		self.pathFindCooldown = self.pathFindCooldown - dt
+		if self.pathFindCooldown < 0 then
+			--states.game:requestPath(self.id, self.position.x, self.position.z, false, false, 256)
+			states.game:requestPath(self.id, self.position.x, self.position.z, states.game.player.position.x, states.game.player.position.z)
+			self.path = false
+		end
+	end
+	
+	if self.path == false then
 		self.path = states.game:fetchRaytracerResult(self.id) or false
 		self.errorTime = 0
+		
+		if self.path then
+			self.pathFindCooldown = #self.path / 10
+		end
 	elseif self.path then
 		if #self.path > 1 then
 			local node = self.path[1]
 			
 			local delta = vec3(node[1], self.position.y, node[2]) - self.position
 			if delta:lengthSquared() > 0.25 then
-				local direction = delta:normalize() * 0.01
+				local direction = delta:normalize() * 0.005
 				self.collider:applyForce(direction.x, direction.z)
 			else
 				states.game:markPath(node[3], node[4], -1)
