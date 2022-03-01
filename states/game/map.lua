@@ -23,7 +23,7 @@ function states.game:drawMap()
 	love.graphics.push()
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.translate(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
-	love.graphics.scale(10)
+	love.graphics.scale(love.mouse.isDown(3) and 40 or 10)
 	love.graphics.translate(-self.player.position.x, -self.player.position.z)
 	love.graphics.setLineWidth(1/16)
 	love.graphics.setLineJoin("none")
@@ -44,6 +44,28 @@ function states.game:drawMap()
 			love.graphics.circle("line", x, y, shape:getRadius() * 2)
 		end
 	end
+	
+	if self.debugNodes then
+		for d,s in ipairs(self.debugNodes) do
+			love.graphics.setColor(1, 1, 1, 0.5)
+			love.graphics.circle("fill", s.x, s.y, 0.1)
+			for i,v in ipairs(s.marks) do
+				if v < 0 then
+					local n = self.debugNodes[s.neighbours[i]]
+					love.graphics.setLineWidth(0.1)
+					love.graphics.setColor(0, 1, 0)
+					love.graphics.line(s.x, s.y, n.x, n.y)
+				elseif v > 0 then
+					local n = self.debugNodes[s.neighbours[i]]
+					love.graphics.setLineWidth(0.1)
+					love.graphics.setColor(1, 0, 0)
+					love.graphics.line(s.x, s.y, n.x, n.y)
+				end
+			end
+		end
+	end
+	
 	love.graphics.pop()
+	
 	return sum
 end

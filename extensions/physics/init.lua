@@ -71,6 +71,8 @@ local worldMeta = {
 				c.topY = false
 				c.bottomY = false
 				c.groundNormal = false
+				
+				c.collided = false
 			end
 		end
 		
@@ -170,6 +172,7 @@ local function attemptSolve(a, b)
 		if diff > 0 and diff < stepSize then
 			colliderA.newY = math.min(colliderA.newY or colliderA.y, l - colliderA.shape.height)
 		elseif diff > 0 then
+			colliderA.collided = true
 			return true
 		end
 		
@@ -184,6 +187,7 @@ local function attemptSolve(a, b)
 			local normal = (n[1] * w1 + n[2] * w2 + n[3] * w3):normalize()
 			colliderA.groundNormal = colliderA.groundNormal and colliderA.groundNormal + normal or normal
 		elseif diff > 0 then
+			colliderA.collided = true
 			return true
 		end
 		
@@ -214,7 +218,7 @@ local function preSolve(a, b, c)
 end
 
 --creates a new world
-function p.newWorld()
+function p:newWorld()
 	local w = { }
 	
 	w.world = love.physics.newWorld(0, 0, false)

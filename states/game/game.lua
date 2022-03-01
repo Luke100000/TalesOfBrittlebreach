@@ -4,6 +4,7 @@ require("states/game/bullets")
 require("states/game/entities")
 require("states/game/map")
 require("states/game/raytracer")
+require("states/game/pathFinder")
 
 world = dream:loadScene("objects/world")
 states.game:loadRaytraceObject("objects/world")
@@ -58,6 +59,21 @@ function states.game:draw()
 	love.graphics.line(x + s, y - c, x + s, y + c)
 	love.graphics.line(x - c, y - s, x + c, y - s)
 	love.graphics.line(x - c, y + s, x + c, y + s)
+	
+	local path = self.entities[2].path
+	if path then
+		local positions = { }
+		for d,s in ipairs(path) do
+			local pixel = dream.cam.transformProj * vec3(s[1], 0, s[2])
+			pixel = (pixel / pixel.z + 1.0) / 2 * vec3(screen.w, screen.h, self.player.position.y)
+			table.insert(positions, pixel.x)
+			table.insert(positions, pixel.y)
+		end
+		if #positions > 2 then
+			love.graphics.setLineWidth(2)
+			love.graphics.line(positions)
+		end
+	end
 end
 
 function states.game:mousemoved(_, _, x, y)
@@ -80,6 +96,7 @@ function states.game:update(dt)
 	self:updateBullets(dt)
 	self:updateEntities(dt)
 	self:updateRaytracer()
+	self:updatePathfinder()
 	
 	dream.delton:start("physics")
 	self.physicsWorld:update(dt)
@@ -103,5 +120,9 @@ end
 function states.game:keypressed(key)
 	if key == "f" then
 		self.freeFly = not self.freeFly
+	end
+	
+	if key == "m" then
+		self:requestPathfinderDebug()
 	end
 end

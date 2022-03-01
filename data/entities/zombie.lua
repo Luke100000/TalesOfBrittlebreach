@@ -11,6 +11,8 @@ function e:new(position)
 	
 	self.collider = states.game.physicsWorld:add(physics:newCircle(0.25, 1.75), "dynamic", position.x, position.y, position.z)
 	self.rot = 0
+	
+	self.errorTime = 0
 end
 
 function e:draw()
@@ -30,14 +32,44 @@ function e:update(dt)
 	self.position = self.collider:getPosition()
 	
 	local cx, cy = self.collider:getVelocity()
-	if cx^2 + cy^2 > 1 then
+	local squaredSpeed = cx^2 + cy^2
+	if squaredSpeed > 1 then
 		self.rot = math.atan2(cy, cx)
 	end
 	
-	local delta = states.game.player.position - self.position
-	if delta:lengthSquared() > 2.0 then
-		local direction = delta:normalize() * 0.01
-	self.collider:applyForce(direction.x, direction.z)
+	if self.path == nil then
+		--states.game:requestPath("zombie", self.position.x, self.position.z, states.game.player.position.x, states.game.player.position.z)
+		states.game:requestPath("zombie", self.position.x, self.position.z)
+		self.path = false
+	elseif not self.path then
+		self.path = states.game:fetchRaytracerResult("zombie") or false
+		self.errorTime = 0
+	elseif self.path then
+		if #self.path > 1 then
+			local node = self.path[1]
+			
+			local delta = vec3(node[1], self.position.y, node[2]) - self.position
+			if delta:lengthSquared() > 0.25 then
+				local direction = delta:normalize() * 0.01
+				self.collider:applyForce(direction.x, direction.z)
+			else
+				states.game:markPath(node[3], node[4], -1)
+				table.remove(self.path, 1)
+			end
+			
+			if self.collider.collided then
+				self.errorTime = self.errorTime + dt
+				if self.errorTime > 0.5 then
+					states.game:markPath(node[3], node[4], 1)
+					self.path = nil
+					self.errorTime = 0
+				end
+			else
+				self.errorTime = 0
+			end
+		else
+			self.path = nil
+		end
 	end
 end
 

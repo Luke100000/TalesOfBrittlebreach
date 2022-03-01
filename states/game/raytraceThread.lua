@@ -1,4 +1,4 @@
-local raytraceInputChannel, raytraceResultChannel = ...
+local inputChannel, outputChannel = ...
 
 --load libraries
 local dream = require("3DreamEngine")
@@ -8,16 +8,8 @@ local raytrace = require("extensions/raytrace")
 --stores meshes
 local objects = { }
 
---from the transform class
-local getInvertedTransform = function(obj)
-	if not obj.inverseTransform then
-		obj.inverseTransform = obj.transform:invert()
-	end
-	return obj.inverseTransform
-end
-
 while true do
-	local task = raytraceInputChannel:demand()
+	local task = inputChannel:demand()
 	
 	if task[1] == "set" then
 		error("not implemented")
@@ -42,7 +34,7 @@ while true do
 		end
 		
 		if bestObjectName then
-			raytraceResultChannel:push({
+			outputChannel:push({
 				ID = task[2],
 				pos = bestPos,
 				normal = raytrace:getNormal(bestObject, bestU, bestV, bestF),
@@ -53,7 +45,7 @@ while true do
 				f = bestF
 			})
 		else
-			raytraceResultChannel:push({
+			outputChannel:push({
 				ID = task[2],
 			})
 		end
