@@ -1,4 +1,4 @@
-local e = extend("entity")
+local e = extend("livingEntity")
 
 e.model = dream:loadObject("objects/player", {callback = function(model)
 	model:setVertexShader("bones")
@@ -8,14 +8,19 @@ e.model:print()
 function e:new(position)
 	e.super.new(self, position)
 	
-	self.collider = states.game.physicsWorld:add(physics:newCircle(0.25, 1.75), "dynamic", position.x, position.y, position.z)
-	self.rot = 0
-	
 	self.cameraDistance = 5
+	self.lookDirection = 0
 end
 
 function e:draw()
-	local pose = data.animations.walkPlayer:getPose(love.timer.getTime())
+	local pose
+	
+	if self.speed > 0.1 then
+		pose = data.animations.walkPlayer:getPose(self.walkingAnimation)
+	else
+		pose = data.animations.standPlayer:getPose(love.timer.getTime())
+	end
+	
 	e.model.meshes.Cube.material:setColor(1, 0, 0)
 	e.model.meshes.Cube.material:setMetallic(1)
 	e.model.meshes.Cube.material:setRoughness(0.5)
@@ -30,8 +35,6 @@ function e:draw()
 end
 
 function e:update(dt)
-	self.position = self.collider:getPosition()
-	
 	return e.super.update(self, dt)
 end
 
@@ -40,10 +43,7 @@ function e:control(dt)
 	local speed = 0.01
 	local rot = 0
 	
-	local cx, cy = self.collider:getVelocity()
-	if cx^2 + cy^2 > 1 then
-		self.rot = math.atan2(cy, cx)
-	end
+	self.rot = self.lookDirection
 	
 	if d("w") then
 		self.collider:applyForce(

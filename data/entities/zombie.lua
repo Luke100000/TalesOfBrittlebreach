@@ -1,4 +1,4 @@
-local e = extend("entity")
+local e = extend("livingEntity")
 
 e.model = dream:loadObject("objects/player", {callback = function(model)
 	model:setVertexShader("bones")
@@ -7,13 +7,9 @@ end})
 function e:new(position)
 	e.super.new(self, position)
 	
-	self.collider = states.game.physicsWorld:add(physics:newCircle(0.25, 1.75), "dynamic", position.x, position.y, position.z)
-	self.rot = 0
-	
 	self.errorTime = 0
 	self.pathFindCooldown = 0
 	
-	self.walkingAnimation = 0
 	self.attackTimer = 0
 	
 	self.state = "idle"
@@ -23,8 +19,10 @@ function e:draw()
 	local pose
 	if self.attackTimer > 0 then
 		pose = data.animations.attackZombie:getPose((1 - self.attackTimer) * 1.5)
-	else
+	elseif self.speed > 0.1 then
 		pose = data.animations.walkZombie:getPose(self.walkingAnimation)
+	else
+		pose = data.animations.standZombie:getPose(self.walkingAnimation)
 	end
 	
 	e.model.meshes.Cube.material:setColor(0, 1, 0)
@@ -41,16 +39,6 @@ function e:draw()
 end
 
 function e:update(dt)
-	self.position = self.collider:getPosition()
-	
-	local cx, cy = self.collider:getVelocity()
-	local speed = math.sqrt(cx^2 + cy^2)
-	if speed > 1 then
-		self.rot = math.atan2(cy, cx)
-	end
-	
-	self.walkingAnimation = self.walkingAnimation + dt * speed
-	
 	--request path
 	if self.path ~= false and self.state ~= "sleeping" then
 		self.pathFindCooldown = self.pathFindCooldown - dt
@@ -78,7 +66,7 @@ function e:update(dt)
 	self.attackTimer = self.attackTimer - dt
 	if self.state == "attack" and dist < 1 and self.attackTimer < 0 then
 		self.state = "idle"
-		states.game.player:damage(10, self)
+		states.game.player:damage(1, self)
 		self.attackTimer = 1
 	end
 	

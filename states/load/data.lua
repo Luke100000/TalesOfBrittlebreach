@@ -54,3 +54,4 @@ data = { }
 
 loadPackage("entities")
 loadPackage("bullets")
+loadPackage("items")

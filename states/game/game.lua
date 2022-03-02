@@ -2,6 +2,7 @@ states.game = { }
 
 require("states/game/bullets")
 require("states/game/entities")
+require("states/game/items")
 require("states/game/map")
 require("states/game/raytracer")
 require("states/game/pathFinder")
@@ -29,6 +30,7 @@ function states.game:switch()
 
 	self.bullets = { }
 	self.entities = { }
+	self.items = { }
 	
 	self.player = self:newEntity("player", vec3(3, 5, 0))
 	
@@ -48,6 +50,7 @@ function states.game:draw()
 	
 	self:drawBullets()
 	self:drawEntities()
+	self:drawItems()
 	
 	dream:draw(world)
 	dream:present()
@@ -105,6 +108,7 @@ function states.game:update(dt)
 	
 	self:updateBullets(dt)
 	self:updateEntities(dt)
+	self:updateItems(dt)
 	self:updateRaytracer()
 	self:updatePathfinder()
 	
@@ -113,6 +117,15 @@ function states.game:update(dt)
 			self:newEntity("zombie", vec3(8, 5, 0))
 		end
 	end
+	
+	local x, y = love.mouse.getPosition()
+	local entity = states.game:findNearestEntity(self.player.position, function(s) return s ~= self.player end)
+	local direction = vec3(
+		screen.h / 2 - y,
+		0,
+		x - screen.w / 2
+	)
+	self.player.lookDirection = math.atan2(direction.z, direction.x)
 	
 	dream.delton:start("physics")
 	self.physicsWorld:update(dt)
@@ -127,7 +140,11 @@ function states.game:mousepressed(x, y, b)
 		x - screen.w / 2
 	)
 	direction = direction:normalize()
-	direction[2] = (entity and entity.position.y or self.player.position.y) - self.player.position.y
+	
+	if entity then
+		local diff = entity.position - self.player.position
+		direction[2] = diff.y / math.sqrt(diff.x^2 + diff.y^2)
+	end
 	self:newBullet("musket", self.player.position + vec3(0, 0.8, 0), direction:normalize(), self.player)
 end
 

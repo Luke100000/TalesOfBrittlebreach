@@ -95,11 +95,7 @@ local worldMeta = {
 				--perform step
 				if c.newY then
 					c.y = c.newY
-					if c.groundNormal and love.keyboard.isDown("space") then
-						c.ay = 5
-					else
-						c.ay = 0
-					end
+					c.ay = 0
 				end
 			end
 		end
