@@ -4,6 +4,11 @@ states = { }
 require("states/load/load")
 require("states/game/game")
 
+local music = love.audio.newSource("music/TalesOfBrittlebreach.ogg", "static")
+music:setLooping(true)
+music:play()
+music:setPitch(1)
+
 function switchState(s, ...)
 	state = s
 	states[state]:switch(...)
