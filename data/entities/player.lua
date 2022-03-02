@@ -10,6 +10,12 @@ function e:new(position)
 	
 	self.cameraDistance = 5
 	self.lookDirection = 0
+	
+	self.torch = dream:newLight("point", vec3(1, 1, 1), vec3(1, 1, 0.2), 20)
+	self.torch:addShadow()
+	self.torch.shadow:setSmooth(true)
+	self.torch.shadow:setStatic(true)
+	self.torch:setAttenuation(3)
 end
 
 function e:draw()
@@ -21,6 +27,8 @@ function e:draw()
 		pose = data.animations.standPlayer:getPose(love.timer.getTime())
 	end
 	
+	self.rot = self.lookDirection
+	
 	e.model.meshes.Cube.material:setColor(1, 0, 0)
 	e.model.meshes.Cube.material:setMetallic(1)
 	e.model.meshes.Cube.material:setRoughness(0.5)
@@ -30,6 +38,14 @@ function e:draw()
 	e.model:rotateY(self.rot - math.pi/2)
 	e.model:translate(self.position)
 	dream:draw(e.model)
+	
+	local dist = 0
+	self.torch:setPosition(self.position + vec3(
+		math.cos(self.rot) * dist,
+		1.5,
+		math.sin(self.rot) * dist
+	))
+	dream:addLight(self.torch)
 	
 	e.super.draw(self)
 end
@@ -42,8 +58,6 @@ function e:control(dt)
 	local d = love.keyboard.isDown
 	local speed = 0.01
 	local rot = 0
-	
-	self.rot = self.lookDirection
 	
 	if d("w") then
 		self.collider:applyForce(
@@ -79,7 +93,7 @@ function e:control(dt)
 	local cameraRay = direction * (distance + safetyMargin)
 	
 	--request colliison check
-	states.game:requestRaytrace("camera", headPosition, cameraRay)
+	--states.game:requestRaytrace("camera", headPosition, cameraRay)
 	local pos = states.game.raytracerResults["camera"]
 	if pos and pos.pos then
 		distance = math.max(1, (pos.pos - headPosition):length() - safetyMargin)

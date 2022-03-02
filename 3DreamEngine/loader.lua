@@ -331,7 +331,7 @@ function lib:processObject(obj)
 			--store link
 			obj.linkedObjects = obj.linkedObjects or { }
 			table.insert(obj.linkedObjects, {
-				source = o.name,
+				source = type(o.tags.link) == "string" and o.tags.link or o.name,
 				transform = o.transform
 			})
 		end

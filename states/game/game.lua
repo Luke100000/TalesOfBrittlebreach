@@ -12,10 +12,10 @@ states.game:loadRaytraceObject("objects/world")
 
 cameraController = require("states/game/cameraController")
 
-sun = dream:newLight("sun", vec3(1, 1, 1), vec3(1, 1, 1), 1)
+sun = dream:newLight("sun", vec3(1, 1, 1), vec3(1, 1, 1), 0)
 sun:addShadow()
 
-dream:setSky(love.graphics.newImage("textures/hdri.jpg"))
+dream:setSky(love.graphics.newImage("textures/hdri.jpg"), 0.1)
 
 local lastId = 0
 function states.game:getId()
