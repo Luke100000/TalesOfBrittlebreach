@@ -1,8 +1,8 @@
-local raytraceThread = love.thread.newThread("states/game/raytraceThread.lua")
+local thread = love.thread.newThread("states/game/raytraceThread.lua")
 local inputChannel = love.thread.newChannel()
 local resultChannel = love.thread.newChannel()
 
-raytraceThread:start(inputChannel, resultChannel)
+thread:start(inputChannel, resultChannel)
 
 states.game.raytracerResults = { }
 states.game.raytracerCallbacks = { }

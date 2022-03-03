@@ -6,9 +6,11 @@ require("states/game/items")
 require("states/game/map")
 require("states/game/raytracer")
 require("states/game/pathFinder")
+require("states/game/physics")
 
 world = dream:loadScene("objects/world")
 states.game:loadRaytraceObject("objects/world")
+states.game:loadPhysicsObject("objects/world")
 
 cameraController = require("states/game/cameraController")
 
@@ -24,10 +26,6 @@ function states.game:getId()
 end
 
 function states.game:switch()
-	--setup physics world
-	self.physicsWorld = physics:newWorld()
-	self.worldCollider = self.physicsWorld:add(physics:newMesh(world))
-
 	self.bullets = { }
 	self.entities = { }
 	self.items = { }
@@ -37,6 +35,7 @@ function states.game:switch()
 	self:newEntity("zombie", vec3(8, 5, 0))
 	
 	self.freeFly = false
+	self.physicsUtilisation = 0
 end
 
 function states.game:draw()
@@ -46,7 +45,7 @@ function states.game:draw()
 	
 	dream:prepare()
 	
-	dream:addLight(sun)
+	--dream:addLight(sun)
 	
 	self:drawBullets()
 	self:drawEntities()
@@ -83,6 +82,8 @@ function states.game:draw()
 --			love.graphics.line(positions)
 --		end
 --	end
+
+	love.graphics.print(love.timer.getFPS() .. " FPS\nPhysics utilisation: " .. math.ceil(self.physicsUtilisation * 100) .. "%", 5, 5)
 end
 
 function states.game:mousemoved(_, _, x, y)
@@ -111,6 +112,7 @@ function states.game:update(dt)
 	self:updateItems(dt)
 	self:updateRaytracer()
 	self:updatePathfinder()
+	self:updatePhysics(dt)
 	
 	if #self.entities < 10 then
 		if math.random() < dt * 0.25 then
@@ -126,10 +128,6 @@ function states.game:update(dt)
 		x - screen.w / 2
 	)
 	self.player.lookDirection = math.atan2(direction.z, direction.x)
-	
-	dream.delton:start("physics")
-	self.physicsWorld:update(dt)
-	dream.delton:stop()
 end
 
 function states.game:mousepressed(x, y, b)

@@ -1,8 +1,8 @@
-local pathfinderThread = love.thread.newThread("states/game/pathfinderThread.lua")
+local thread = love.thread.newThread("states/game/pathfinderThread.lua")
 local inputChannel = love.thread.newChannel()
 local resultChannel = love.thread.newChannel()
 
-pathfinderThread:start(inputChannel, resultChannel)
+thread:start(inputChannel, resultChannel)
 
 states.game.pathfinderResults = { }
 states.game.pathfinderCallbacks = { }

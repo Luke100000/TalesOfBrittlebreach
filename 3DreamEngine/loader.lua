@@ -128,7 +128,9 @@ function lib:loadObject(path, args)
 	for _,typ in ipairs(lib.supportedFiles) do
 		if found[typ] then
 			--load object
+			self.deltonLoad:start("parser")
 			local failed = self.loader[typ](self, obj, path .. "." .. typ)
+			self.deltonLoad:stop()
 			
 			--skip furhter modifying and exporting if already packed as 3do
 			--also skips mesh loading since it is done manually

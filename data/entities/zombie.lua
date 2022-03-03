@@ -88,13 +88,13 @@ function e:update(dt)
 			local delta = vec3(node[1], self.position.y, node[2]) - self.position
 			if delta:lengthSquared() > 0.25 and dist > 0.75 then
 				local direction = delta:normalize() * (self.state == "idle" and 0.005 or 0.01)
-				self.collider:applyForce(direction.x, direction.z)
+				states.game:applyForce(self, direction.x, direction.z)
 			else
 				states.game:markPath(node[3], node[4], -1)
 				table.remove(self.path, 1)
 			end
 			
-			if self.collider.collided then
+			if self.collided then
 				self.errorTime = self.errorTime + dt
 				if self.errorTime > 0.1 then
 					states.game:markPath(node[3], node[4], 1)

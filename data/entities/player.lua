@@ -60,25 +60,25 @@ function e:control(dt)
 	local rot = 0
 	
 	if d("w") then
-		self.collider:applyForce(
+		states.game:applyForce(self,
 			math.cos(rot) * speed,
 			math.sin(rot) * speed
 		)
 	end
 	if d("d") then
-		self.collider:applyForce(
+		states.game:applyForce(self,
 			math.cos(rot+math.pi/2) * speed,
 			math.sin(rot+math.pi/2) * speed
 		)
 	end
 	if d("s") then
-		self.collider:applyForce(
+		states.game:applyForce(self,
 			math.cos(rot+math.pi) * speed,
 			math.sin(rot+math.pi) * speed
 		)
 	end
 	if d("a") then
-		self.collider:applyForce(
+		states.game:applyForce(self,
 			math.cos(rot-math.pi/2) * speed,
 			math.sin(rot-math.pi/2) * speed
 		)

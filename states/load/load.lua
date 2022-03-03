@@ -18,6 +18,8 @@ love.graphics.setLineJoin("bevel")
 io.stdout:setvbuf("no")
 
 dream = require("3DreamEngine")
+dream.defaultArgs.export3do = true
+
 dream:loadMaterialLibrary("materials")
 
 dream:loadLibrary("objects/libraries/buildings")
@@ -27,8 +29,6 @@ dream:loadLibrary("objects/libraries/nature")
 dream:loadLibrary("objects/libraries/plants")
 
 dream:init()
-
-physics = require("extensions/physics")
 
 require("states/load/data")
 

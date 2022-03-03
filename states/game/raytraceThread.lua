@@ -5,6 +5,8 @@ local dream = require("3DreamEngine")
 
 local raytrace = require("extensions/raytrace")
 
+dream:loadMaterialLibrary("materials")
+
 dream:loadLibrary("objects/libraries/buildings", {mesh=false, cleanup=false})
 dream:loadLibrary("objects/libraries/buildings_castle", {mesh=false, cleanup=false}, "castle_")
 dream:loadLibrary("objects/libraries/furniture", {mesh=false, cleanup=false})

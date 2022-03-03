@@ -2,6 +2,7 @@ local lib = _3DreamEngine
 
 local function verfiyBones(bones)
 	for _, bone in pairs(bones) do
+		bone.transform = bone.transform and mat4(bone.transform)
 		if bone.children then
 			verfiyBones(bone.children)
 		end

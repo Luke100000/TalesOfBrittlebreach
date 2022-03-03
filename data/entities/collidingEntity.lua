@@ -3,20 +3,19 @@ local e = extend("entity")
 function e:new(position)
 	e.super.new(self, position)
 	
-	self.collider = states.game.physicsWorld:add(physics:newCircle(0.25, 1.5), "dynamic", position.x, position.y, position.z)
+	states.game:addDynamics(self, 0.25, 1.5)
 	
 	self.rot = 0
 	self.speed = 0
 	self.walkingAnimation = 0
+	
+	self.velocity = vec3()
 end
 
 function e:update(dt)
-	self.position = self.collider:getPosition()
-	
-	local cx, cy = self.collider:getVelocity()
-	self.speed = math.sqrt(cx^2 + cy^2)
+	self.speed = math.sqrt(self.velocity.x^2 + self.velocity.z^2)
 	if self.speed > 1 then
-		self.rot = math.atan2(cy, cx)
+		self.rot = math.atan2(self.velocity.z, self.velocity.x)
 	end
 	
 	self.walkingAnimation = self.walkingAnimation + dt * self.speed
