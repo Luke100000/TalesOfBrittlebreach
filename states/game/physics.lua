@@ -41,6 +41,8 @@ function states.game:updatePhysics(dt)
 			dynamics[task.physicsId].collided = task.collided
 		elseif task.dt then
 			states.game.physicsUtilisation = states.game.physicsUtilisation * (1 - dt) + task.dt
+		elseif task.map then
+			self.map = task.map
 		end
 	end
 end

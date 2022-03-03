@@ -1,24 +1,3 @@
-local sum = 0
-local centerX = 0
-local centerY = 0
-
-local function draw(c)
-	if c.body then
-		for _,fixture in ipairs(c.body:getFixtures()) do
-			local shape = fixture:getShape()
-			local x1, y1, x2, y2, x3, y3 = c.body:getWorldPoints(shape:getPoints())
-			centerX = centerX + (x1 + x2 + x3) / 3
-			centerY = centerY + (y1 + y2 + y3) / 3
-			love.graphics.polygon("line", x1, y1, x2, y2, x3, y3)
-			sum = sum + 1
-		end
-	else
-		for d,s in ipairs(c) do
-			draw(s)
-		end
-	end
-end
-
 function states.game:drawMap()
 	love.graphics.push()
 	love.graphics.setColor(1, 1, 1, 1)
@@ -28,11 +7,17 @@ function states.game:drawMap()
 	love.graphics.setLineWidth(1/16)
 	love.graphics.setLineJoin("none")
 	
-	sum = 0
-	centerX = 0
-	centerY = 0
+	local sum = 0
+	local centerX = 0
+	local centerY = 0
 	
-	draw(self.worldCollider)
+	for _,shape in ipairs(states.game.map) do
+		local x1, y1, x2, y2, x3, y3 = unpack(shape)
+		centerX = centerX + (x1 + x2 + x3) / 3
+		centerY = centerY + (y1 + y2 + y3) / 3
+		love.graphics.polygon("line", x1, y1, x2, y2, x3, y3)
+		sum = sum + 1
+	end
 	
 	centerX = centerX / sum
 	centerY = centerY / sum

@@ -21,6 +21,20 @@ local physicsWorld = physics:newWorld()
 
 local colliders = { }
 
+local map
+local function createMap(c)
+	if c.body then
+		for _,fixture in ipairs(c.body:getFixtures()) do
+			local shape = fixture:getShape()
+			table.insert(map, {c.body:getWorldPoints(shape:getPoints())})
+		end
+	else
+		for d,s in ipairs(c) do
+			createMap(s)
+		end
+	end
+end
+
 while true do
 	local task = inputChannel:demand()
 	
@@ -32,8 +46,11 @@ while true do
 		--setup physics
 		local collider = physicsWorld:add(physics:newMesh(object))
 		
+		map = { }
+		createMap(collider)
+		
 		outputChannel:push({
-			ID = task[2],
+			map = map,
 		})
 	elseif task[1] == "add" then
 		colliders[task[2]] = physicsWorld:add(physics:newCircle(task[3], task[4]), "dynamic", task[5], task[6], task[7])
