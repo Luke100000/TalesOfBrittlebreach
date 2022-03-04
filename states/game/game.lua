@@ -9,15 +9,14 @@ require("states/game/pathFinder")
 require("states/game/physics")
 
 world = dream:loadScene("objects/world")
+world:print()
+
 states.game:loadRaytraceObject("objects/world")
 states.game:loadPhysicsObject("objects/world")
 
 cameraController = require("states/game/cameraController")
 
-sun = dream:newLight("sun", vec3(1, 1, 1), vec3(1, 1, 1), 0)
-sun:addShadow()
-
-dream:setSky(love.graphics.newImage("textures/hdri.jpg"), 1)
+dream:setSky(love.graphics.newImage("textures/hdri.jpg"), 0.1)
 
 local lastId = 0
 function states.game:getId()
@@ -30,13 +29,40 @@ function states.game:switch()
 	self.entities = { }
 	self.items = { }
 	
-	self.player = self:newEntity("player", vec3(3, 5, 0))
+	self.player = self:newEntity("player", world.objects.spawn.transform * world.objects.spawn.positions[1].position)
 	
-	self:newEntity("zombie", vec3(8, 5, 0))
+	for d,s in pairs({"musket", "crossbow", "ammo"}) do
+		for i,v in ipairs(world.objects[s].positions) do
+			self:newItem(s, world.objects[s].transform * v.position)
+		end
+	end
 	
-	self:newItem("musket", vec3(5, 1.5, 0))
-	self:newItem("crossbow", vec3(5, 1.5, 0))
-	self:newItem("ammo", vec3(5, 1.5, 0))
+	for _,pos in pairs(world.objects.spawner.positions) do
+		local p = pos.position
+		self:newEntity("zombie", p)
+	end
+	
+	self.lights = { }
+	for d,s in pairs(world.lights) do
+		local s = s:clone()
+		table.insert(self.lights, s)
+		s:addShadow()
+		s.shadow:setStatic(true)
+		s.shadow:setSmooth(true)
+		s:setAttenuation(3)
+	end
+	
+	for i,v in pairs(world.objects) do
+		for d,s in pairs(v.lights) do
+			local s = s:clone()
+			table.insert(self.lights, s)
+			s:addShadow()
+			s:setPosition(v.transform * s.pos)
+			s.shadow:setStatic(true)
+			s.shadow:setSmooth(true)
+			s:setAttenuation(3)
+		end
+	end
 	
 	self.freeFly = false
 	self.physicsUtilisation = 0
@@ -46,6 +72,8 @@ function states.game:switch()
 	self.inventory = { }
 	self.selected = 1
 	self.ammo = 10
+	
+	self.time = 0
 	
 	--self:openDialogue(lang.story, vec3(10, 0, 20))
 end
@@ -74,7 +102,21 @@ function states.game:draw()
 	
 	dream:prepare()
 	
-	--dream:addLight(sun)
+	local distance = 18
+	table.sort(self.lights, function(a, b)
+		a.dist = (a.pos - self.player.position):length()
+		b.dist = (b.pos - self.player.position):length()
+		return a.dist < b.dist
+	end)
+	for d,s in ipairs(self.lights) do
+		if s.dist < distance then
+			s.originalBrightness = s.originalBrightness or s.brightness
+			s.brightness = s.originalBrightness * math.min(1, distance - s.dist)
+			dream:addLight(s)
+		else
+			break
+		end
+	end
 	
 	self:drawBullets()
 	self:drawEntities()
@@ -203,6 +245,8 @@ function states.game:update(dt)
 	else
 		self.player:control(dt)
 	end
+	
+	self.time = self.time + dt
 	
 	love.mouse.setRelativeMode(self.freeFly)
 	love.mouse.setVisible(self.freeFly)

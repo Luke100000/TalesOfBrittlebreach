@@ -3,7 +3,6 @@ local e = extend("livingEntity")
 e.model = dream:loadObject("objects/player", {callback = function(model)
 	model:setVertexShader("bones")
 end})
-e.model:print()
 
 function e:new(position)
 	e.super.new(self, position)
