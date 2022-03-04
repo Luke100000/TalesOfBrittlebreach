@@ -63,7 +63,7 @@ end
 
 function e:control(dt)
 	local d = love.keyboard.isDown
-	local speed = 0.01
+	local speed = 0.005
 	local rot = 0
 	
 	local cx, cy = 0, 0

@@ -86,7 +86,7 @@ local worldMeta = {
 				if c.bottomY and c.topY and c.topY - c.bottomY < c.shape.height then
 					c.y = c.oldY
 					c.ay = 0
-					c.body:setPosition(c.oldX, c.oldZ)
+					c.body:setPosition(c.oldX or 0, c.oldZ or 0)
 					c.body:setLinearVelocity(0, 0)
 					c.pre_oldX, c.pre_oldZ = c.oldX, c.oldZ
 					c.newY = nil

@@ -3,7 +3,7 @@ local e = extend("entity")
 function e:new(position)
 	e.super.new(self, position)
 	
-	states.game:addDynamics(self, 0.25, 1.5)
+	states.game:addDynamics(self, 0.2, 1.5)
 	
 	self.rot = 0
 	self.speed = 0

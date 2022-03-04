@@ -15,6 +15,7 @@ function e:new(position)
 	self.dieTimer = 0
 	
 	self.state = math.random() < 0.1 and "attack" or math.random() < 0.5 and "idle" or "sleeping"
+	self.state = "attack"
 end
 
 function e:draw()
@@ -101,10 +102,10 @@ function e:update(dt)
 				
 				local delta = vec3(node[1], self.position.y, node[2]) - self.position
 				if delta:lengthSquared() > 0.25 and dist > 0.75 then
-					local direction = delta:normalize() * (self.state == "idle" and 0.005 or 0.01)
+					local direction = delta:normalize() * (self.state == "idle" and 0.0025 or 0.005)
 					states.game:applyForce(self, direction.x, direction.z)
 				else
-					states.game:markPath(node[3], node[4], -1)
+					--states.game:markPath(node[3], node[4], -1)
 					table.remove(self.path, 1)
 				end
 				

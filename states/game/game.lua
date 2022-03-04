@@ -87,6 +87,8 @@ function states.game:switch()
 	self.waveTimer = 0
 	
 	love.graphics.setNewFont("fonts/Kingthings Calligraphica.ttf", 32)
+	
+	self:updatePhysics(0)
 end
 
 function states.game:openDialogue(text, positions)
@@ -321,7 +323,7 @@ end
 function states.game:spawnHorde(chance)
 	for _,pos in pairs(world.objects.spawner.positions) do
 		if math.random() < chance then
-			self:newEntity("zombie", pos.position)
+			self:newEntity("zombie", world.objects.spawner.transform * pos.position)
 		end
 	end
 end

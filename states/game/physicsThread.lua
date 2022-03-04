@@ -24,9 +24,16 @@ local colliders = { }
 local map
 local function createMap(c)
 	if c.body then
-		for _,fixture in ipairs(c.body:getFixtures()) do
-			local shape = fixture:getShape()
-			table.insert(map, {c.body:getWorldPoints(shape:getPoints())})
+		local h = 0
+		for d,s in ipairs(c.shape.highest) do
+			h = h + s[1] + s[2] + s[3]
+		end
+		h = h / #c.shape.highest / 3
+		if h > 0.5 then
+			for _,fixture in ipairs(c.body:getFixtures()) do
+				local shape = fixture:getShape()
+				table.insert(map, {c.body:getWorldPoints(shape:getPoints())})
+			end
 		end
 	else
 		for d,s in ipairs(c) do
@@ -48,6 +55,8 @@ while true do
 		
 		map = { }
 		createMap(collider)
+		
+		love.thread.getChannel("pathfinderBlockingChannel"):push(map)
 		
 		outputChannel:push({
 			map = map,
