@@ -18,7 +18,7 @@ function e:update(dt)
 		self.rot = math.atan2(self.velocity.z, self.velocity.x)
 	end
 	
-	self.walkingAnimation = self.walkingAnimation + dt * self.speed
+	self.walkingAnimation = self.walkingAnimation + dt * self.speed * 0.5
 	
 	return e.super.update(self, dt)
 end

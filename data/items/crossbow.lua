@@ -1,19 +1,14 @@
 local e = extend("item")
 
-e.model = dream:loadObject("objects/items/musket")
-
-e.ammo = true
+e.model = dream:loadObject("objects/items/crossbow")
 
 function e:new(position)
 	e.super.new(self, position)
 end
 
 function e:use(entity)
-	if states.game.ammo > 0 then
-		local direction = states.game:getShootingDirection(entity)
-		states.game:newBullet("ball", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
-		states.game.ammo = states.game.ammo - 1
-	end
+	local direction = states.game:getShootingDirection(entity)
+	states.game:newBullet("arrow", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
 end
 
 function e:drawEquipped(t)

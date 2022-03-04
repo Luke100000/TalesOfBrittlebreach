@@ -32,11 +32,16 @@ dream:init()
 
 require("states/load/data")
 
+lang = require("lang/english")
+
+love.graphics.setNewFont("fonts/Kingthings Calligraphica.ttf", 32)
+
 data.animations = { }
 for d,s in ipairs(love.filesystem.getDirectoryItems("objects/animations")) do
 	if s:sub(-4) == ".dae" then
 		local name = s:sub(1, -5)
 		local o = dream:loadObject("objects/animations/" .. name)
 		data.animations[name] = o.animations.Default or o.animations.Armature
+		o:print()
 	end
 end

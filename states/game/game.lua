@@ -17,7 +17,7 @@ cameraController = require("states/game/cameraController")
 sun = dream:newLight("sun", vec3(1, 1, 1), vec3(1, 1, 1), 0)
 sun:addShadow()
 
-dream:setSky(love.graphics.newImage("textures/hdri.jpg"), 0.1)
+dream:setSky(love.graphics.newImage("textures/hdri.jpg"), 1)
 
 local lastId = 0
 function states.game:getId()
@@ -34,8 +34,37 @@ function states.game:switch()
 	
 	self:newEntity("zombie", vec3(8, 5, 0))
 	
+	self:newItem("musket", vec3(5, 1.5, 0))
+	self:newItem("crossbow", vec3(5, 1.5, 0))
+	self:newItem("ammo", vec3(5, 1.5, 0))
+	
 	self.freeFly = false
 	self.physicsUtilisation = 0
+	
+	self.dialogues = { }
+	
+	self.inventory = { }
+	self.selected = 1
+	self.ammo = 10
+	
+	--self:openDialogue(lang.story, vec3(10, 0, 20))
+end
+
+function states.game:openDialogue(text, positions)
+	if type(text) == "string" then
+		text = {text}
+	end
+	if positions and type(positions[1]) == "number" then
+		positions = {positions}
+	end
+	local position
+	for i = 1, #text do
+		position = positions[i] or position
+		table.insert(self.dialogues, {
+			text = text[i],
+			position = position,
+		})
+	end
 end
 
 function states.game:draw()
@@ -58,6 +87,7 @@ function states.game:draw()
 		states.game:drawMap()
 	end
 	
+	--crosshair
 	local x, y = love.mouse.getPosition()
 	local s = 10
 	local c = 4
@@ -67,6 +97,72 @@ function states.game:draw()
 	love.graphics.line(x + s, y - c, x + s, y + c)
 	love.graphics.line(x - c, y - s, x + c, y - s)
 	love.graphics.line(x - c, y + s, x + c, y + s)
+	
+	local w = 700
+	local h = 500
+	local scale = math.min(screen.w / w, screen.h / h)
+	love.graphics.push()
+	love.graphics.translate((screen.w - w * scale) / 2, (screen.h - h * scale) / 2)
+	love.graphics.scale(scale)
+	
+	--dialogue
+	if #self.dialogues > 0 then
+		love.graphics.push()
+		love.graphics.translate(175, 175)
+		love.graphics.setColor(0, 0, 0, 0.5)
+		love.graphics.rectangle("fill", 0, 0, 350, 150, 16)
+		love.graphics.setColor(1, 1, 1)
+		love.graphics.printf(self.dialogues[1].text, 10, 20, 330 / 0.5, "center", 0, 0.5)
+		love.graphics.setColor(1, 1, 1, 0.5)
+		love.graphics.printf("(press space to continue)", 10, 120, 330 / 0.5, "center", 0, 0.5)
+		love.graphics.pop()
+	end
+	
+	--pickup items
+	for d,s in ipairs(self.items) do
+		if (s.position - self.player.position):lengthSquared() < 10 then
+			love.graphics.push()
+			love.graphics.translate(260, 400)
+			love.graphics.setColor(0, 0, 0, 0.5)
+			love.graphics.rectangle("fill", 0, 0, 200, 30, 16)
+			love.graphics.setColor(1, 1, 1)
+			love.graphics.printf("press E to pick up", 0, 6, 200 / 0.5, "center", 0, 0.5)
+			love.graphics.pop()
+			
+			if keypressed_button == "e" then
+				table.remove(self.items, d)
+				s:pickup()
+			end
+			break
+		end
+	end
+	
+	--ammo
+	if self.inventory[self.selected] and self.inventory[self.selected].ammo then
+		love.graphics.setColor(1, 1, 1)
+		love.graphics.print(self.ammo .. " ammo", 5, h - 40, 0, 0.5)
+	end
+	
+	--items
+	for d,s in ipairs(self.inventory) do
+		love.graphics.push()
+		love.graphics.translate(w - 100, h - 40 * (#self.inventory - d + 1))
+		love.graphics.setColor(0, 0, 0, 0.5)
+		love.graphics.rectangle("fill", 0, 0, 100, 30, 5)
+		if states.game.selected == d then
+			love.graphics.setColor(1, 1, 1, 0.5)
+			love.graphics.setLineWidth(2)
+			love.graphics.rectangle("line", 0, 0, 100, 30, 5)
+		end
+		love.graphics.setColor(1, 1, 1)
+		love.graphics.printf(s.name, 0, 6, 90 / 0.5, "center", 0, 0.5)
+		love.graphics.setColor(1, 1, 1, 0.5)
+		love.graphics.printf(d, 0, 6, 100 / 0.5 - 10, "right", 0, 0.5)
+		love.graphics.pop()
+	end
+	
+	love.graphics.pop()
+	
 	
 --	local path = self.entities[2].path
 --	if path then
@@ -82,8 +178,11 @@ function states.game:draw()
 --			love.graphics.line(positions)
 --		end
 --	end
-
-	love.graphics.print(love.timer.getFPS() .. " FPS\nPhysics utilisation: " .. math.ceil(self.physicsUtilisation * 100) .. "%", 5, 5)
+	
+	if love.keyboard.isDown("f1") then
+		love.graphics.setColor(1, 1, 1)
+		love.graphics.print(love.timer.getFPS() .. " FPS\nPhysics utilisation: " .. math.ceil(self.physicsUtilisation * 100) .. "%", 5, 5, 0, 0.5)
+	end
 end
 
 function states.game:mousemoved(_, _, x, y)
@@ -106,32 +205,35 @@ function states.game:update(dt)
 	end
 	
 	love.mouse.setRelativeMode(self.freeFly)
+	love.mouse.setVisible(self.freeFly)
 	
-	self:updateBullets(dt)
-	self:updateEntities(dt)
-	self:updateItems(dt)
-	self:updateRaytracer()
-	self:updatePathfinder()
-	self:updatePhysics(dt)
-	
-	if #self.entities < 10 then
-		if math.random() < dt * 0.25 then
-			self:newEntity("zombie", vec3(8, 5, 0))
+	if #self.dialogues == 0 then
+		self:updateBullets(dt)
+		self:updateEntities(dt)
+		self:updateItems(dt)
+		self:updateRaytracer()
+		self:updatePathfinder()
+		self:updatePhysics(dt)
+		
+		if #self.entities < 10 then
+			if math.random() < dt * 0.25 then
+				self:newEntity("zombie", vec3(8, 5, 0))
+			end
 		end
+		
+		local x, y = love.mouse.getPosition()
+		local entity = states.game:findNearestEntity(self.player.position, function(s) return s ~= self.player end)
+		local direction = vec3(
+			screen.h / 2 - y,
+			0,
+			x - screen.w / 2
+		)
+		self.player.lookDirection = math.atan2(direction.z, direction.x)
 	end
-	
-	local x, y = love.mouse.getPosition()
-	local entity = states.game:findNearestEntity(self.player.position, function(s) return s ~= self.player end)
-	local direction = vec3(
-		screen.h / 2 - y,
-		0,
-		x - screen.w / 2
-	)
-	self.player.lookDirection = math.atan2(direction.z, direction.x)
 end
 
-function states.game:mousepressed(x, y, b)
-	local entity = states.game:findNearestEntity(self.player.position, function(s) return s ~= self.player end)
+function states.game:getShootingDirection(entity)
+	local x, y = love.mouse.getPosition()
 	local direction = vec3(
 		screen.h / 2 - y,
 		0,
@@ -139,19 +241,34 @@ function states.game:mousepressed(x, y, b)
 	)
 	direction = direction:normalize()
 	
-	if entity then
-		local diff = entity.position - self.player.position
+	local e = states.game:findNearestEntity(entity.position, function(s) return s ~= entity end)
+	if e then
+		local diff = e.position - entity.position
 		direction[2] = diff.y / math.sqrt(diff.x^2 + diff.y^2)
 	end
-	self:newBullet("musket", self.player.position + vec3(0, 0.8, 0), direction:normalize(), self.player)
+	return direction
+end
+
+function states.game:mousepressed(x, y, b)
+	if b == 1 and self.inventory[self.selected] then
+		self.inventory[self.selected]:use(self.player)
+	end
 end
 
 function states.game:keypressed(key)
+	if tonumber(key) then
+		states.game.selected = tonumber(key)
+	end
+	
 	if key == "f" then
 		self.freeFly = not self.freeFly
 	end
 	
 	if key == "m" then
 		self:requestPathfinderDebug()
+	end
+	
+	if key == "space" then
+		table.remove(self.dialogues, 1)
 	end
 end

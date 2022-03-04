@@ -47,6 +47,13 @@ function e:draw()
 	))
 	dream:addLight(self.torch)
 	
+	local item = states.game.inventory[states.game.selected]
+	if item then
+		local transform = e.model.skeleton:getTransform("mixamorig_RightHand")
+		self.weaponTransform = e.model.transform * transform * mat4:getScale(100) * mat4:getRotateY(math.pi/2) * mat4:getRotateX(-math.pi/2)
+		item:drawEquipped(self.weaponTransform)
+	end
+	
 	e.super.draw(self)
 end
 
@@ -59,28 +66,24 @@ function e:control(dt)
 	local speed = 0.01
 	local rot = 0
 	
+	local cx, cy = 0, 0
 	if d("w") then
-		states.game:applyForce(self,
-			math.cos(rot) * speed,
-			math.sin(rot) * speed
-		)
+		cx = 1
 	end
 	if d("d") then
-		states.game:applyForce(self,
-			math.cos(rot+math.pi/2) * speed,
-			math.sin(rot+math.pi/2) * speed
-		)
+		cy = 1
 	end
 	if d("s") then
-		states.game:applyForce(self,
-			math.cos(rot+math.pi) * speed,
-			math.sin(rot+math.pi) * speed
-		)
+		cx = -1
 	end
 	if d("a") then
+		cy = -1
+	end
+	local v = math.sqrt(cx^2 + cy^2)
+	if v > 0 then
 		states.game:applyForce(self,
-			math.cos(rot-math.pi/2) * speed,
-			math.sin(rot-math.pi/2) * speed
+			cx * speed / v,
+			cy * speed / v
 		)
 	end
 	
@@ -92,7 +95,7 @@ function e:control(dt)
 	local direction = vec3(-math.cos(rot) * tilt, 1, -math.sin(rot) * tilt):normalize()
 	local cameraRay = direction * (distance + safetyMargin)
 	
-	--request colliison check
+	--request collison check
 	--states.game:requestRaytrace("camera", headPosition, cameraRay)
 	local pos = states.game.raytracerResults["camera"]
 	if pos and pos.pos then
@@ -107,6 +110,10 @@ function e:control(dt)
 	end
 	
 	--set camera
+	if states.game.dialogues[1] and states.game.dialogues[1].position then
+		headPosition = states.game.dialogues[1].position
+	end
+	
 	dream.cam:setTransform(
 		dream:lookAt(headPosition + direction * distance, headPosition):invert()
 	)

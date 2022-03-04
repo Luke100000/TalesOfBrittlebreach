@@ -23,11 +23,7 @@ function states.game:drawMap()
 	centerY = centerY / sum
 	
 	for _,e in ipairs(self.entities) do
-		if e.collider then
-			local shape = e.collider.body:getFixtures()[1]:getShape()
-			local x, y = e.collider.body:getWorldPoints(0, 0)
-			love.graphics.circle("line", x, y, shape:getRadius() * 2)
-		end
+		love.graphics.circle("line", e.position.x, e.position.z, 0.5)
 	end
 	
 	if self.debugNodes then
