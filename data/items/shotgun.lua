@@ -1,6 +1,6 @@
 local e = extend("item")
 
-e.model = dream:loadObject("objects/items/musket")
+e.model = dream:loadObject("objects/items/shotgun")
 
 e.ammo = true
 
@@ -11,7 +11,13 @@ end
 function e:use(entity)
 	if states.game.ammo > 0 then
 		local direction = states.game:getShootingDirection(entity)
-		states.game:newBullet("ball", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
+		for i = 1, 5 do
+			states.game:newBullet("ball", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize() + vec3(
+				math.random()-0.5,
+				math.random()-0.5,
+				math.random()-0.5
+			) * 0.25, entity, 5)
+		end
 		states.game.ammo = states.game.ammo - 1
 		soundManager:play("musket")
 	end

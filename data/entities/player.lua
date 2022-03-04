@@ -11,7 +11,7 @@ function e:new(position)
 	self.lookDirection = 0
 	self.dialogueCameraBlend = 0
 	
-	self.torch = dream:newLight("point", vec3(1, 1, 1), vec3(1, 1, 0.2), 20)
+	self.torch = dream:newLight("point", vec3(1, 1, 1), vec3(1, 1, 0.2), 25)
 	self.torch:addShadow()
 	self.torch.shadow:setSmooth(true)
 	self.torch.shadow:setStatic(true)
@@ -24,7 +24,7 @@ function e:draw()
 	if self.speed > 0.1 then
 		pose = data.animations.walkPlayer:getPose(self.walkingAnimation)
 	else
-		pose = data.animations.standPlayer:getPose(love.timer.getTime())
+		pose = data.animations.standPlayer:getPose(states.game.time)
 	end
 	
 	self.rot = self.lookDirection

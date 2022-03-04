@@ -198,7 +198,7 @@ function lib:loadObject(path, args)
 					if difference > 10^-10 then
 						print(string.format("Warning: two meshes (%s and %s) within the same object (%s) have different transforms!", id, next(o.meshes), mesh.name))
 					end
-					--mesh.transform = nil
+					mesh.transform = o.transform:invert() * mesh.transform
 				end
 				
 				obj.meshes[id] = nil

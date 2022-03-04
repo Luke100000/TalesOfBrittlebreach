@@ -1,6 +1,6 @@
 local e = extend("item")
 
-e.model = dream:loadObject("objects/items/ammo")
+e.model = dream:loadObject("objects/items/gold")
 
 function e:new(position)
 	e.super.new(self, position)
@@ -24,8 +24,12 @@ function e:update(dt)
 end
 
 function e:pickup()
-	states.game.ammo = states.game.ammo + 10
+	states.game.gold = states.game.gold + 1
 	soundManager:play("ammo")
+	
+	if states.game.gold == 3 then
+		self:newItem("shotgun", self.itemPositions.shotgun)
+	end
 end
 
 return e

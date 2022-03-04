@@ -32,7 +32,7 @@ function states.game:switch()
 	self.player = self:newEntity("player", world.objects.spawn.transform * world.objects.spawn.positions[1].position)
 	
 	self.itemPositions = { }
-	for d,s in pairs({"musket", "crossbow", "ammo"}) do
+	for d,s in pairs({"musket", "crossbow", "ammo", "gold"}) do
 		for i,v in ipairs(world.objects[s].positions) do
 			local p = world.objects[s].transform * v.position
 			self:newItem(s, p)
@@ -40,10 +40,14 @@ function states.game:switch()
 		end
 	end
 	
-	for _,pos in pairs(world.objects.spawner.positions) do
-		local p = pos.position
-		self:newEntity("zombie", p)
+	for d,s in pairs({"trader", "shotgun"}) do
+		for i,v in ipairs(world.objects[s].positions) do
+			local p = world.objects[s].transform * v.position
+			self.itemPositions[s] = p
+		end
 	end
+	
+	self:spawnHorde(0.25)
 	
 	self.lights = { }
 	for d,s in pairs(world.lights) do
@@ -60,6 +64,7 @@ function states.game:switch()
 			local s = s:clone()
 			table.insert(self.lights, s)
 			s:addShadow()
+			s:setBrightness(20)
 			s:setPosition(v.transform * s.pos)
 			s.shadow:setStatic(true)
 			s.shadow:setSmooth(true)
@@ -75,8 +80,13 @@ function states.game:switch()
 	self.inventory = { }
 	self.selected = 1
 	self.ammo = 10
+	self.gold = 0
+	self.wave = 1
 	
 	self.time = 0
+	self.waveTimer = 0
+	
+	love.graphics.setNewFont("fonts/Kingthings Calligraphica.ttf", 32)
 end
 
 function states.game:openDialogue(text, positions)
@@ -155,7 +165,7 @@ function states.game:draw()
 		love.graphics.setColor(0, 0, 0, 0.5)
 		love.graphics.rectangle("fill", 0, 0, 350, 150, 16)
 		love.graphics.setColor(1, 1, 1)
-		love.graphics.printf(self.dialogues[1].text, 10, 20, 330 / 0.5, "center", 0, 0.5)
+		love.graphics.printf(self.dialogues[1].text, 10, 20, 330 / 0.6, "center", 0, 0.6)
 		love.graphics.setColor(1, 1, 1, 0.5)
 		love.graphics.printf("(press space to continue)", 10, 120, 330 / 0.5, "center", 0, 0.5)
 		love.graphics.pop()
@@ -181,9 +191,17 @@ function states.game:draw()
 	end
 	
 	--ammo
+	love.graphics.setColor(1, 1, 1)
 	if self.inventory[self.selected] and self.inventory[self.selected].ammo then
-		love.graphics.setColor(1, 1, 1)
 		love.graphics.print(self.ammo .. " ammo", 5, h - 40, 0, 0.5)
+	end
+	
+	love.graphics.print(self.player.health .. " / 10 health", 5, h - 40 - 30, 0, 0.5)
+	
+	if self._textTrader then
+		love.graphics.print(self.gold .. " / 3 gold", 5, h - 40 - 60, 0, 0.5)
+		love.graphics.print(self.wave .. " / 3 waves", 5, h - 40 - 90, 0, 0.5)
+		love.graphics.print("sec until next wave: " .. math.floor(self.waveTimer), 5, h - 40 - 120, 0, 0.5)
 	end
 	
 	--items
@@ -248,29 +266,46 @@ function states.game:update(dt)
 		self.player:control(dt)
 	end
 	
-	self.time = self.time + dt
+	if self._textTrader then
+		self.time = self.time + dt
+	end
 	
-	if self.time > 3 and not self._textInit then
+	if not self._textInit then
 		self._textInit = true
 		self:openDialogue(lang.story, self.itemPositions.crossbow)
+	end
+	
+	if (self.itemPositions.trader - self.player.position):lengthSquared() < 40 and not self._textTrader then
+		self._textTrader = true
+		self.waveTimer = 100
+		self:openDialogue(lang.trader, self.itemPositions.trader)
 	end
 	
 	love.mouse.setRelativeMode(self.freeFly)
 	love.mouse.setVisible(self.freeFly)
 	
 	if #self.dialogues == 0 then
+		if self.waveTimer > 0 then
+			self.waveTimer = self.waveTimer - dt
+			if self.waveTimer <= 0 then
+				
+				self.waveTimer = 200
+				self.wave = self.wave + 1
+				
+				if self.wave == 4 then
+					self:openDialogue(lang.win, self.player.position)
+				end
+				
+				self:spawnHorde(self.wave * 0.25)
+			end
+		end
+		
 		self:updateBullets(dt)
 		self:updateEntities(dt)
 		self:updateItems(dt)
 		self:updateRaytracer()
 		self:updatePathfinder()
 		self:updatePhysics(dt)
-		
-		if #self.entities < 10 then
-			if math.random() < dt * 0.25 then
-				self:newEntity("zombie", vec3(8, 5, 0))
-			end
-		end
 		
 		local x, y = love.mouse.getPosition()
 		local entity = states.game:findNearestEntity(self.player.position, function(s) return s ~= self.player end)
@@ -280,6 +315,14 @@ function states.game:update(dt)
 			x - screen.w / 2
 		)
 		self.player.lookDirection = math.atan2(direction.z, direction.x)
+	end
+end
+
+function states.game:spawnHorde(chance)
+	for _,pos in pairs(world.objects.spawner.positions) do
+		if math.random() < chance then
+			self:newEntity("zombie", pos.position)
+		end
 	end
 end
 
@@ -321,5 +364,9 @@ function states.game:keypressed(key)
 	
 	if key == "space" then
 		table.remove(self.dialogues, 1)
+	end
+	
+	if key == "escape" then
+		os.exit()
 	end
 end

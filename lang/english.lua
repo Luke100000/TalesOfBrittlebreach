@@ -4,15 +4,14 @@ return {
 		"Quick, pickup this crossbow someone forgot here and see whats going on!",
 		"Use WASD or arrow keys to move, left mouse to shoot and E to interact.",
 	},
-	traderInit = {
-		"Help!",
+	trader = {
+		"Oh hello there! I'm here! Under that barrel! The dangerous placeholder enemies purged the entire village, but I managed to hide from them!",
+		"Anyways, my name is Joel, I'm the village trader! And you are my only remaining customer!",
+		"I know that there are 3 stacks of gold ingots around here, bring me all 3 and I will sell you my precious shotgun to you.",
+		"Oh and if you have the time, maybe save this village, or whats left from it. Just survive the next 3 incoming waves I have alerted for you!",
 	},
-	traderHelped = {
-		"Puh! They nearly got me! Anyways, my name is Joel, I'm the village trader! And you are my only remaining customer!",
-		"Check out my stock! Collect gold from all around the world if you are broke.",
-	},
-	gate = {
-		"The gate is proteced by 3 locks, whose keys have been stolen by the dangerous placeholder enemies.",
-		"Continue exploring the world, they are hidden quite obvious.",
+	win = {
+		"You have successfully defended the village!",
+		"Since this is a prototype, you may continue playing and compete against hordes of stronger and stronger enemies!",
 	},
 }

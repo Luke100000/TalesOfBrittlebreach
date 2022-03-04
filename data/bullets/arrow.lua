@@ -6,7 +6,7 @@ function e:new(position, direction, shooter)
 	e.super.new(self, position, direction, shooter)
 	
 	self.speed = 30
-	self.damage = 10
+	self.damage = 5
 end
 
 function e:draw()

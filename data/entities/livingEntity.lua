@@ -3,7 +3,7 @@ local e = extend("collidingEntity")
 function e:new(position)
 	e.super.new(self, position)
 	
-	self.health = 20
+	self.health = 10
 end
 
 function e:damage(damage, attacker)

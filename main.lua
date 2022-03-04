@@ -3,17 +3,18 @@ require("error")("Tales of Brittlebreach", "1.0.0")
 states = { }
 require("states/load/load")
 require("states/game/game")
+require("states/menu/menu")
 
 local music = love.audio.newSource("music/TalesOfBrittlebreach.ogg", "static")
 music:setLooping(true)
---music:play()
+music:play()
 music:setPitch(1)
 
 function switchState(s, ...)
 	state = s
 	states[state]:switch(...)
 end
-switchState("game")
+switchState("menu")
 
 
 local _, desktopHeight = love.window.getDesktopDimensions()

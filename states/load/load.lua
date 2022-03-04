@@ -38,8 +38,6 @@ soundManager:addLibrary("sounds")
 
 lang = require("lang/english")
 
-love.graphics.setNewFont("fonts/Kingthings Calligraphica.ttf", 32)
-
 data.animations = { }
 for d,s in ipairs(love.filesystem.getDirectoryItems("objects/animations")) do
 	if s:sub(-4) == ".dae" then
