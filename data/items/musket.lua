@@ -13,6 +13,7 @@ function e:use(entity)
 		local direction = states.game:getShootingDirection(entity)
 		states.game:newBullet("ball", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
 		states.game.ammo = states.game.ammo - 1
+		soundManager:play("musket")
 	end
 end
 
@@ -37,6 +38,7 @@ function e:update(dt)
 end
 
 function e:pickup()
+	soundManager:play("pickup")
 	table.insert(states.game.inventory, self)
 end
 

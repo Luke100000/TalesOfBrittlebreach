@@ -9,6 +9,7 @@ function e:new(position)
 	
 	self.cameraDistance = 5
 	self.lookDirection = 0
+	self.dialogueCameraBlend = 0
 	
 	self.torch = dream:newLight("point", vec3(1, 1, 1), vec3(1, 1, 0.2), 20)
 	self.torch:addShadow()
@@ -110,7 +111,10 @@ function e:control(dt)
 	
 	--set camera
 	if states.game.dialogues[1] and states.game.dialogues[1].position then
-		headPosition = states.game.dialogues[1].position
+		headPosition = states.game.dialogues[1].position * self.dialogueCameraBlend + headPosition * (1 - self.dialogueCameraBlend)
+		self.dialogueCameraBlend = math.min(1, self.dialogueCameraBlend + dt * 3)
+	else
+		self.dialogueCameraBlend = math.max(0, self.dialogueCameraBlend - dt * 3)
 	end
 	
 	dream.cam:setTransform(

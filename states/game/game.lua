@@ -31,9 +31,12 @@ function states.game:switch()
 	
 	self.player = self:newEntity("player", world.objects.spawn.transform * world.objects.spawn.positions[1].position)
 	
+	self.itemPositions = { }
 	for d,s in pairs({"musket", "crossbow", "ammo"}) do
 		for i,v in ipairs(world.objects[s].positions) do
-			self:newItem(s, world.objects[s].transform * v.position)
+			local p = world.objects[s].transform * v.position
+			self:newItem(s, p)
+			self.itemPositions[s] = p
 		end
 	end
 	
@@ -74,8 +77,6 @@ function states.game:switch()
 	self.ammo = 10
 	
 	self.time = 0
-	
-	--self:openDialogue(lang.story, vec3(10, 0, 20))
 end
 
 function states.game:openDialogue(text, positions)
@@ -203,6 +204,7 @@ function states.game:draw()
 		love.graphics.pop()
 	end
 	
+	love.graphics.setColor(1, 1, 1)
 	love.graphics.pop()
 	
 	
@@ -247,6 +249,11 @@ function states.game:update(dt)
 	end
 	
 	self.time = self.time + dt
+	
+	if self.time > 3 and not self._textInit then
+		self._textInit = true
+		self:openDialogue(lang.story, self.itemPositions.crossbow)
+	end
 	
 	love.mouse.setRelativeMode(self.freeFly)
 	love.mouse.setVisible(self.freeFly)

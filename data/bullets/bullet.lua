@@ -7,7 +7,7 @@ function e:new(position, direction, shooter)
 	
 	self.initialPosition = self.position
 	
-	states.game:requestRaytrace(self.id, position, direction * 100)
+	states.game:requestRaytrace(self.id, self.position, self.direction * 100)
 	
 	self.speed = 10
 	self.damage = 5
@@ -18,14 +18,16 @@ function e:draw()
 end
 
 function e:update(dt)
-	self.position = self.position + self.direction * dt * self.speed
-	
 	--hit wall
 	self.hitPoint = self.hitPoint or states.game:fetchRaytracerResult(self.id)
 	if self.hitPoint and self.hitPoint.pos then
 		if (self.position - self.initialPosition):lengthSquared() > (self.initialPosition - self.hitPoint.pos):lengthSquared() then
+			soundManager:play("wall")
 			return true
 		end
+	end
+	if self.hitPoint then
+		self.position = self.position + self.direction * dt * self.speed
 	end
 	
 	--hit enemy
@@ -34,6 +36,7 @@ function e:update(dt)
 		local distance = (self.position.x - entity.position.x)^2 + (self.position.z - entity.position.z)^2
 		if distance < 0.5 then
 			entity:damage(self.damage, self)
+			soundManager:play("hit")
 			return true
 		end
 	end

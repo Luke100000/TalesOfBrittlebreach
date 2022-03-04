@@ -9,6 +9,7 @@ end
 function e:use(entity)
 	local direction = states.game:getShootingDirection(entity)
 	states.game:newBullet("arrow", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
+	soundManager:play("crossbow")
 end
 
 function e:drawEquipped(t)
@@ -32,6 +33,7 @@ function e:update(dt)
 end
 
 function e:pickup()
+	soundManager:play("pickup")
 	table.insert(states.game.inventory, self)
 end
 

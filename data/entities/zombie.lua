@@ -12,13 +12,16 @@ function e:new(position)
 	self.pathFindCooldown = 0
 	
 	self.attackTimer = 0
+	self.dieTimer = 0
 	
-	self.state = "idle"
+	self.state = math.random() < 0.1 and "attack" or math.random() < 0.5 and "idle" or "sleeping"
 end
 
 function e:draw()
 	local pose
-	if self.attackTimer > 0 then
+	if self.health <= 0 then
+		pose = data.animations.dieZombie:getPose(math.min(12 / 30, self.dieTimer))
+	elseif self.attackTimer > 0 then
 		pose = data.animations.attackZombie:getPose((1 - self.attackTimer) * 1.5)
 	elseif self.speed > 0.1 then
 		pose = data.animations.walkZombie:getPose(self.walkingAnimation)
@@ -53,13 +56,21 @@ function e:update(dt)
 		end
 	end
 	
+	if self.health <= 0 then
+		self.dieTimer = self.dieTimer + dt
+		if self.state ~= "dead" then
+			self.state = "dead"
+			soundManager:play("death" .. math.random(1, 5))
+		end
+	end
+	
 	local dist = (self.position - states.game.player.position):lengthSquared()
 	
-	if self.state == "sleeping" and dist < 4^2 then
+	if self.state == "sleeping" and dist < 5^2 then
 		self.state = "idle"
 	end
 	
-	if self.state == "idle" and dist < 8^2 then
+	if self.state == "idle" and dist < 10^2 then
 		self.state = "attack"
 	end
 	
@@ -67,50 +78,60 @@ function e:update(dt)
 	self.attackTimer = self.attackTimer - dt
 	if self.state == "attack" and dist < 1 and self.attackTimer < 0 then
 		self.state = "idle"
+		soundManager:play("punch")
 		states.game.player:damage(1, self)
 		self.attackTimer = 1
 	end
 	
-	if self.path == false then
-		self.path = states.game:fetchRaytracerResult(self.id) or false
-		self.errorTime = 0
-		
-		if self.path then
-			if self.state == "idle" then
-				self.pathFindCooldown = #self.path / 4 + math.random() * 10
-			else
-				self.pathFindCooldown = #self.path / 10
-			end
-		end
-	elseif self.path then
-		if #self.path > 1 then
-			local node = self.path[1]
+	if self.state ~= "dead" then
+		if self.path == false then
+			self.path = states.game:fetchRaytracerResult(self.id) or false
+			self.errorTime = 0
 			
-			local delta = vec3(node[1], self.position.y, node[2]) - self.position
-			if delta:lengthSquared() > 0.25 and dist > 0.75 then
-				local direction = delta:normalize() * (self.state == "idle" and 0.005 or 0.01)
-				states.game:applyForce(self, direction.x, direction.z)
-			else
-				states.game:markPath(node[3], node[4], -1)
-				table.remove(self.path, 1)
+			if self.path then
+				if self.state == "idle" then
+					self.pathFindCooldown = #self.path / 4 + math.random() * 10
+				else
+					self.pathFindCooldown = #self.path / 10
+				end
 			end
-			
-			if self.collided then
-				self.errorTime = self.errorTime + dt
-				if self.errorTime > 0.1 then
-					states.game:markPath(node[3], node[4], 1)
-					self.path = nil
+		elseif self.path then
+			if #self.path > 1 then
+				local node = self.path[1]
+				
+				local delta = vec3(node[1], self.position.y, node[2]) - self.position
+				if delta:lengthSquared() > 0.25 and dist > 0.75 then
+					local direction = delta:normalize() * (self.state == "idle" and 0.005 or 0.01)
+					states.game:applyForce(self, direction.x, direction.z)
+				else
+					states.game:markPath(node[3], node[4], -1)
+					table.remove(self.path, 1)
+				end
+				
+				if self.collided then
+					self.errorTime = self.errorTime + dt
+					if self.errorTime > 0.1 then
+						states.game:markPath(node[3], node[4], 1)
+						self.path = nil
+						self.errorTime = 0
+					end
+				else
 					self.errorTime = 0
 				end
 			else
-				self.errorTime = 0
+				self.path = nil
 			end
-		else
-			self.path = nil
 		end
 	end
 	
 	return e.super.update(self, dt)
+end
+
+function e:damage(dmg)
+	if self.state ~= "dead" then
+		self.state = "attack"
+	end
+	return e.super.damage(self, dmg)
 end
 
 return e

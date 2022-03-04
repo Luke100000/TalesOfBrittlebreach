@@ -9,7 +9,7 @@ function e:draw()
 end
 
 function e:update(dt)
-	return self.health <= 0
+	return self.health <= 0 and (not self.dieTimer or self.dieTimer > 1)
 end
 
 function e:control(dt)

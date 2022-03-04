@@ -19,6 +19,7 @@ io.stdout:setvbuf("no")
 
 dream = require("3DreamEngine")
 dream.defaultArgs.export3do = true
+dream.defaultArgs.cleanup = false
 
 dream:loadMaterialLibrary("materials")
 
@@ -31,6 +32,9 @@ dream:loadLibrary("objects/libraries/plants")
 dream:init()
 
 require("states/load/data")
+
+soundManager = require("extensions/sound")
+soundManager:addLibrary("sounds")
 
 lang = require("lang/english")
 
