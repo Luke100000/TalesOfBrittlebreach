@@ -4,6 +4,7 @@ states = { }
 require("states/load/load")
 require("states/game/game")
 require("states/menu/menu")
+require("states/gameover/gameover")
 
 local music = love.audio.newSource("music/TalesOfBrittlebreach.ogg", "static")
 music:setLooping(true)

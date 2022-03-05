@@ -7,9 +7,12 @@ function e:new(position)
 end
 
 function e:use(entity)
-	local direction = states.game:getShootingDirection(entity)
-	states.game:newBullet("arrow", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
-	soundManager:play("crossbow")
+	if not self.lastUse or (states.game.time - self.lastUse) > 0.5 then
+		self.lastUse = states.game.time
+		local direction = states.game:getShootingDirection(entity)
+		states.game:newBullet("arrow", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
+		soundManager:play("crossbow")
+	end
 end
 
 function e:drawEquipped(t)

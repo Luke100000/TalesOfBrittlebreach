@@ -14,8 +14,7 @@ function e:new(position)
 	self.attackTimer = 0
 	self.dieTimer = 0
 	
-	self.state = math.random() < 0.1 and "attack" or math.random() < 0.5 and "idle" or "sleeping"
-	self.state = "attack"
+	self.state = math.random() < 0.2 and "attack" or math.random() < 0.8 and "idle" or "sleeping"
 end
 
 function e:draw()
@@ -61,17 +60,17 @@ function e:update(dt)
 		self.dieTimer = self.dieTimer + dt
 		if self.state ~= "dead" then
 			self.state = "dead"
-			soundManager:play("death" .. math.random(1, 5))
+			self:onDeath()
 		end
 	end
 	
 	local dist = (self.position - states.game.player.position):lengthSquared()
 	
-	if self.state == "sleeping" and dist < 5^2 then
+	if self.state == "sleeping" and dist < 8^2 then
 		self.state = "idle"
 	end
 	
-	if self.state == "idle" and dist < 10^2 then
+	if self.state == "idle" and dist < 16^2 then
 		self.state = "attack"
 	end
 	
@@ -102,7 +101,7 @@ function e:update(dt)
 				
 				local delta = vec3(node[1], self.position.y, node[2]) - self.position
 				if delta:lengthSquared() > 0.25 and dist > 0.75 then
-					local direction = delta:normalize() * (self.state == "idle" and 0.0025 or 0.005)
+					local direction = delta:normalize() * (self.state == "idle" and 0.0025 or 0.005) * (self.walkingSpeed or 1)
 					states.game:applyForce(self, direction.x, direction.z)
 				else
 					--states.game:markPath(node[3], node[4], -1)
@@ -126,6 +125,10 @@ function e:update(dt)
 	end
 	
 	return e.super.update(self, dt)
+end
+
+function e:onDeath()
+	soundManager:play("death" .. math.random(1, 5))
 end
 
 function e:damage(dmg)

@@ -24,7 +24,7 @@ function e:update(dt)
 end
 
 function e:pickup()
-	states.game.ammo = states.game.ammo + 10
+	states.game.ammo = states.game.ammo + 5
 	soundManager:play("ammo")
 end
 

@@ -18,6 +18,7 @@ function states.game:updateEntities(dt)
 		local s = self.entities[d]
 		local remove = s:update(dt)
 		if remove then
+			states.game:removeDynamics(self)
 			table.remove(self.entities, d)
 		end
 	end

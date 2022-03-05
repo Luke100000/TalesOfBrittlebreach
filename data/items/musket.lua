@@ -9,11 +9,14 @@ function e:new(position)
 end
 
 function e:use(entity)
-	if states.game.ammo > 0 then
-		local direction = states.game:getShootingDirection(entity)
-		states.game:newBullet("ball", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
-		states.game.ammo = states.game.ammo - 1
-		soundManager:play("musket")
+	if not self.lastUse or (states.game.time - self.lastUse) > 0.5 then
+		self.lastUse = states.game.time
+		if states.game.ammo > 0 then
+			local direction = states.game:getShootingDirection(entity)
+			states.game:newBullet("ball", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
+			states.game.ammo = states.game.ammo - 1
+			soundManager:play("musket")
+		end
 	end
 end
 

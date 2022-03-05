@@ -199,7 +199,7 @@ local function expand(cx, cy, x, y)
 	local dx = x - cx
 	local dy = y - cy
 	local d = math.sqrt(dx^2 + dy^2)
-	local f = 0.25
+	local f = 0.5
 	return x + dx / d * f, y + dy / d * f
 end
 

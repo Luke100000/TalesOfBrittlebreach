@@ -58,7 +58,9 @@ function e:draw()
 end
 
 function e:update(dt)
-	return e.super.update(self, dt)
+	if e.super.update(self, dt) then
+		switchState("gameover")
+	end
 end
 
 function e:control(dt)

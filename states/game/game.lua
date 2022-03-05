@@ -5,7 +5,7 @@ require("states/game/entities")
 require("states/game/items")
 require("states/game/map")
 require("states/game/raytracer")
-require("states/game/pathFinder")
+require("states/game/pathfinder")
 require("states/game/physics")
 
 world = dream:loadScene("objects/world")
@@ -192,36 +192,38 @@ function states.game:draw()
 		end
 	end
 	
-	--ammo
-	love.graphics.setColor(1, 1, 1)
-	if self.inventory[self.selected] and self.inventory[self.selected].ammo then
-		love.graphics.print(self.ammo .. " ammo", 5, h - 40, 0, 0.5)
-	end
-	
-	love.graphics.print(self.player.health .. " / 10 health", 5, h - 40 - 30, 0, 0.5)
-	
-	if self._textTrader then
-		love.graphics.print(self.gold .. " / 3 gold", 5, h - 40 - 60, 0, 0.5)
-		love.graphics.print(self.wave .. " / 3 waves", 5, h - 40 - 90, 0, 0.5)
-		love.graphics.print("sec until next wave: " .. math.floor(self.waveTimer), 5, h - 40 - 120, 0, 0.5)
-	end
-	
-	--items
-	for d,s in ipairs(self.inventory) do
-		love.graphics.push()
-		love.graphics.translate(w - 100, h - 40 * (#self.inventory - d + 1))
-		love.graphics.setColor(0, 0, 0, 0.5)
-		love.graphics.rectangle("fill", 0, 0, 100, 30, 5)
-		if states.game.selected == d then
-			love.graphics.setColor(1, 1, 1, 0.5)
-			love.graphics.setLineWidth(2)
-			love.graphics.rectangle("line", 0, 0, 100, 30, 5)
-		end
+	if not love.keyboard.isDown("f3") then
+		--ammo
 		love.graphics.setColor(1, 1, 1)
-		love.graphics.printf(s.name, 0, 6, 90 / 0.5, "center", 0, 0.5)
-		love.graphics.setColor(1, 1, 1, 0.5)
-		love.graphics.printf(d, 0, 6, 100 / 0.5 - 10, "right", 0, 0.5)
-		love.graphics.pop()
+		if self.inventory[self.selected] and self.inventory[self.selected].ammo then
+			love.graphics.print(self.ammo .. " ammo", 5, h - 40, 0, 0.5)
+		end
+		
+		love.graphics.print(self.player.health .. " / 10 health", 5, h - 40 - 30, 0, 0.5)
+		
+		if self._textTrader then
+			love.graphics.print(self.gold .. " / 3 gold", 5, h - 40 - 60, 0, 0.5)
+			love.graphics.print(self.wave .. " / 3 waves", 5, h - 40 - 90, 0, 0.5)
+			love.graphics.print("sec until next wave: " .. math.floor(self.waveTimer), 5, h - 40 - 120, 0, 0.5)
+		end
+		
+		--items
+		for d,s in ipairs(self.inventory) do
+			love.graphics.push()
+			love.graphics.translate(w - 100, h - 40 * (#self.inventory - d + 1))
+			love.graphics.setColor(0, 0, 0, 0.5)
+			love.graphics.rectangle("fill", 0, 0, 100, 30, 5)
+			if states.game.selected == d then
+				love.graphics.setColor(1, 1, 1, 0.5)
+				love.graphics.setLineWidth(2)
+				love.graphics.rectangle("line", 0, 0, 100, 30, 5)
+			end
+			love.graphics.setColor(1, 1, 1)
+			love.graphics.printf(s.name, 0, 6, 90 / 0.5, "center", 0, 0.5)
+			love.graphics.setColor(1, 1, 1, 0.5)
+			love.graphics.printf(d, 0, 6, 100 / 0.5 - 10, "right", 0, 0.5)
+			love.graphics.pop()
+		end
 	end
 	
 	love.graphics.setColor(1, 1, 1)
@@ -268,9 +270,7 @@ function states.game:update(dt)
 		self.player:control(dt)
 	end
 	
-	if self._textTrader then
-		self.time = self.time + dt
-	end
+	self.time = self.time + dt
 	
 	if not self._textInit then
 		self._textInit = true
@@ -298,7 +298,7 @@ function states.game:update(dt)
 					self:openDialogue(lang.win, self.player.position)
 				end
 				
-				self:spawnHorde(self.wave * 0.25)
+				self:spawnHorde(self.wave * 0.15)
 			end
 		end
 		
@@ -321,9 +321,19 @@ function states.game:update(dt)
 end
 
 function states.game:spawnHorde(chance)
+	local zombies = {
+		"zombie",
+		"zombie",
+		"zombie",
+		"zombie",
+		"redZombie",
+		"redZombie",
+		"goldenZombie",
+		"blackZombie",
+	}
 	for _,pos in pairs(world.objects.spawner.positions) do
 		if math.random() < chance then
-			self:newEntity("zombie", world.objects.spawner.transform * pos.position)
+			self:newEntity(zombies[math.random(1, #zombies)], world.objects.spawner.transform * pos.position)
 		end
 	end
 end
@@ -370,5 +380,12 @@ function states.game:keypressed(key)
 	
 	if key == "escape" then
 		os.exit()
+	end
+	
+	if key == "return" then
+		self.player.torch.shadow = nil
+		
+		dream.renderSet:setMode("direct")
+		dream:init()
 	end
 end

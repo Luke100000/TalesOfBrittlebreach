@@ -2,7 +2,7 @@ return {
 	story = {
 		"You are a lonely traveller on your way to Brittlebreach, when you noticed that the region around the town is overun by dangerous placeholder enemies!",
 		"Quick, pickup this crossbow someone forgot here and see whats going on!",
-		"Use WASD or arrow keys to move, left mouse to shoot and E to interact.",
+		"Use WASD or arrow keys to move, left mouse to shoot and E to interact. Press enter to enable low-graphics mode if it's lagging.",
 	},
 	trader = {
 		"Oh hello there! I'm here! Under that barrel! The dangerous placeholder enemies purged the entire village, but I managed to hide from them!",

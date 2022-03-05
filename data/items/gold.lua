@@ -28,7 +28,7 @@ function e:pickup()
 	soundManager:play("ammo")
 	
 	if states.game.gold == 3 then
-		self:newItem("shotgun", self.itemPositions.shotgun)
+		states.game:newItem("shotgun", states.game.itemPositions.shotgun)
 	end
 end
 

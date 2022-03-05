@@ -74,6 +74,8 @@ local function draw(fancyMsg)
 	love.graphics.translate((love.graphics.getWidth()-800) / 2, (love.graphics.getHeight()-450) / 2)
 	love.graphics.clear(love.graphics.getBackgroundColor())
 	
+	love.system.setClipboardText(fancyMsg)
+	
 	love.graphics.setColor(1.0, 1.0, 1.0, 0.2)
 	love.graphics.rectangle("fill", 10, 10, 780, 430, 5)
 	love.graphics.setColor(0.1, 0.1, 0.1, 0.2)

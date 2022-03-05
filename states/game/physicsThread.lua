@@ -29,7 +29,14 @@ local function createMap(c)
 			h = h + s[1] + s[2] + s[3]
 		end
 		h = h / #c.shape.highest / 3
-		if h > 0.5 then
+		
+		local l = 0
+		for d,s in ipairs(c.shape.lowest) do
+			l = l + s[1] + s[2] + s[3]
+		end
+		l = l / #c.shape.lowest / 3
+		
+		if h > 0.5 and l < 0.1 then
 			for _,fixture in ipairs(c.body:getFixtures()) do
 				local shape = fixture:getShape()
 				table.insert(map, {c.body:getWorldPoints(shape:getPoints())})
@@ -63,8 +70,15 @@ while true do
 		})
 	elseif task[1] == "add" then
 		colliders[task[2]] = physicsWorld:add(physics:newCircle(task[3], task[4]), "dynamic", task[5], task[6], task[7])
+	elseif task[1] == "remove" then
+		if colliders[task[2]] then
+			colliders[task[2]].body:destroy()
+			colliders[task[2]] = nil
+		end
 	elseif task[1] == "force" then
-		colliders[task[2]]:applyForce(task[3], task[4])
+		if colliders[task[2]] then
+			colliders[task[2]]:applyForce(task[3], task[4])
+		end
 	elseif task[1] == "update" then
 		local time = love.timer.getTime()
 		physicsWorld:update(task[2])
