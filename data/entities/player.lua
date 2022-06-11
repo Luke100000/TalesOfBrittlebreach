@@ -11,7 +11,7 @@ function e:new(position)
 	self.lookDirection = 0
 	self.dialogueCameraBlend = 0
 	
-	self.torch = dream:newLight("point", vec3(1, 1, 1), vec3(1, 1, 0.2), 25)
+	self.torch = dream:newLight("point", vec3(1, 1, 1), vec3(1, 1, 0.2), 250)
 	self.torch:addShadow()
 	self.torch.shadow:setSmooth(true)
 	self.torch.shadow:setStatic(true)
@@ -33,7 +33,7 @@ function e:draw()
 	e.model.meshes.Cube.material:setMetallic(1)
 	e.model.meshes.Cube.material:setRoughness(0.5)
 	e.model:applyPose(pose)
-	e.model:reset()
+	e.model:resetTransform()
 	e.model:scale(1 / 100)
 	e.model:rotateY(self.rot - math.pi/2)
 	e.model:translate(self.position)

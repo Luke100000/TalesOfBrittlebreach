@@ -50,7 +50,11 @@ local function createMap(c)
 end
 
 while true do
-	local task = inputChannel:demand()
+	local t = love.timer.getTime()
+	local task
+	while not task do
+		task = inputChannel:demand()
+	end
 	
 	if task[1] == "set" then
 		error("not implemented")
@@ -83,10 +87,6 @@ while true do
 		local time = love.timer.getTime()
 		physicsWorld:update(task[2])
 		
-		outputChannel:push({
-			dt = love.timer.getTime() - time
-		})
-		
 		for physicsId, collider in pairs(colliders) do
 			outputChannel:push({
 				physicsId = physicsId,
@@ -95,5 +95,9 @@ while true do
 				collided = collider.collided
 			})
 		end
+		
+		outputChannel:push({
+			dt = love.timer.getTime() - time
+		})
 	end
 end

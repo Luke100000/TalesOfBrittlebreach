@@ -11,7 +11,7 @@ function e:use()
 end
 
 function e:draw()
-	e.model:reset()
+	e.model:resetTransform()
 	e.model:rotateY(states.game.time)
 	e.model:translate(self.position + vec3(0, math.cos(states.game.time) * 0.1, 0))
 	dream:draw(e.model)

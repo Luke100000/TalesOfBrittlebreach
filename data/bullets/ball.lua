@@ -10,7 +10,7 @@ function e:new(position, direction, shooter, damage)
 end
 
 function e:draw()
-	e.model:reset()
+	e.model:resetTransform()
 	e.model:translate(self.position)
 	dream:draw(e.model)
 end

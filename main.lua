@@ -21,11 +21,11 @@ switchState("menu")
 local _, desktopHeight = love.window.getDesktopDimensions()
 function love.draw()
 	guiScale = 1 / math.sqrt(love.graphics.getHeight() / desktopHeight)
-	
+
 	if states[state].draw then
 		states[state]:draw()
 	end
-	
+
 	mousepressed_button = false
 	mousereleased_button = false
 	keypressed_button = false
@@ -37,7 +37,7 @@ function love.update(dt)
 	if states[state].update then
 		states[state]:update(dt)
 	end
-	
+
 	dream:update()
 end
 
@@ -123,7 +123,7 @@ function love.resize(w, h)
 	if states[state].resize then
 		states[state]:resize(w, h)
 	end
-	
+
 	dream:resize()
 end
 

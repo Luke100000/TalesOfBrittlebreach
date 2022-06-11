@@ -19,6 +19,7 @@ io.stdout:setvbuf("no")
 
 dream = require("3DreamEngine")
 dream.defaultArgs.export3do = true
+dream.defaultArgs.skip3do = false
 dream.defaultArgs.cleanup = false
 
 dream:loadMaterialLibrary("materials")

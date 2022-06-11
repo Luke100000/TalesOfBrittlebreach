@@ -32,7 +32,7 @@ end
 
 function states.game:updatePhysics(dt)
 	lagging = lagging + dt
-	if inputChannel:getCount() == 0 then
+	if inputChannel:getCount() < 5 then
 		inputChannel:push({"update", math.min(1 / 10, lagging)})
 		lagging = 0
 	end
