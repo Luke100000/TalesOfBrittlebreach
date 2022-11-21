@@ -47,8 +47,8 @@ print = function(...)
 	else
 		--tostring
 		local t = { }
-		for d,s in ipairs({...}) do
-			t[#t+1] = tostring(s)
+		for d, s in ipairs({ ... }) do
+			t[#t + 1] = tostring(s)
 		end
 		
 		--logging
@@ -69,12 +69,10 @@ local fonts = {
 
 --draw function
 local errorReceived = false
-local function draw(fancyMsg)
+local function draw(_)
 	love.graphics.origin()
-	love.graphics.translate((love.graphics.getWidth()-800) / 2, (love.graphics.getHeight()-450) / 2)
+	love.graphics.translate((love.graphics.getWidth() - 800) / 2, (love.graphics.getHeight() - 450) / 2)
 	love.graphics.clear(love.graphics.getBackgroundColor())
-	
-	love.system.setClipboardText(fancyMsg)
 	
 	love.graphics.setColor(1.0, 1.0, 1.0, 0.2)
 	love.graphics.rectangle("fill", 10, 10, 780, 430, 5)
@@ -104,9 +102,8 @@ local function draw(fancyMsg)
 		love.graphics.printf("server not available.", 0, 350, 800, "center")
 	else
 		love.graphics.setColor(0.8, 0.1, 0.1)
-		local anim = math.floor(love.timer.getTime()*2)
-		local anim_string = 
-		love.graphics.printf("uploading error" .. string.rep(".", anim - math.floor(anim/4)*4), 0, 340, 800, "center")
+		local anim = math.floor(love.timer.getTime() * 2)
+		local anim_string = love.graphics.printf("uploading error" .. string.rep(".", anim - math.floor(anim / 4) * 4), 0, 340, 800, "center")
 	end
 	
 	love.graphics.present()
@@ -115,11 +112,13 @@ end
 local function handler(msg)
 	local fancyMsg = (debug.traceback("Error: " .. tostring(msg), 1):gsub("\n[^\n]+$", ""))
 	
+	love.system.setClipboardText(fancyMsg)
+	
 	--crop irrelevant things out
 	local start = string.find(fancyMsg, "err.lua:114: in function <error.lua:", 0, true)
 	local end_ = string.find(fancyMsg, [==[[string "boot.lua"]:777: in function <[string "boot.lua"]==], 0, true)
 	if start and end_ then
-		fancyMsg = fancyMsg:sub(0, start-1) .. fancyMsg:sub(end_+64)
+		fancyMsg = fancyMsg:sub(0, start - 1) .. fancyMsg:sub(end_ + 64)
 	end
 	
 	--device
@@ -135,7 +134,7 @@ local function handler(msg)
 	end
 	
 	--detailed error
-	love.timer.sleep(1/100)
+	love.timer.sleep(1 / 100)
 	local fancyMsgDetailed = fancyMsg .. "\n\nCLIENT LOG START\n" .. table.concat(printLog, "\n")
 	fancyMsgDetailed = fancyMsgDetailed:sub(1, 1024 * 1024)
 	
@@ -172,11 +171,11 @@ local function handler(msg)
 		end
 		
 		--upload error
-		channel_send:push({"https://katzmair.eu/~luke100000/lovum/error.php",
-			"game=" .. gameInfo.name:gsub(" ", "") ..
-			"&version=" .. gameInfo.version:gsub(" ", "") ..
-			"&username=" .. gameInfo.username:gsub(" ", "") ..
-			"&error=" .. base64_encode(fancyMsgDetailed)}
+		channel_send:push({ "https://katzmair.eu/~luke100000/lovum/error.php",
+							"game=" .. gameInfo.name:gsub(" ", "") ..
+									"&version=" .. gameInfo.version:gsub(" ", "") ..
+									"&username=" .. gameInfo.username:gsub(" ", "") ..
+									"&error=" .. base64_encode(fancyMsgDetailed) }
 		)
 	end
 	
@@ -208,7 +207,7 @@ local function handler(msg)
 		end
 		
 		if love.timer then
-			love.timer.sleep(1/60)
+			love.timer.sleep(1 / 60)
 		end
 	end
 end

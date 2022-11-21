@@ -19,11 +19,10 @@ io.stdout:setvbuf("no")
 
 dream = require("3DreamEngine")
 dream.defaultArgs.export3do = true
-dream.defaultArgs.skip3do = false
+dream.defaultArgs.skip3do = true --todo
 dream.defaultArgs.cleanup = false
 
 dream:loadMaterialLibrary("materials")
-
 dream:loadLibrary("objects/libraries/buildings")
 dream:loadLibrary("objects/libraries/buildings_castle", nil, "castle_")
 dream:loadLibrary("objects/libraries/furniture")
@@ -40,11 +39,11 @@ soundManager:addLibrary("sounds")
 lang = require("lang/english")
 
 data.animations = { }
-for d,s in ipairs(love.filesystem.getDirectoryItems("objects/animations")) do
-	if s:sub(-4) == ".dae" then
+for _,s in ipairs(love.filesystem.getDirectoryItems("objects/animations")) do
+	if s:sub(-4) == ".glb" then
 		local name = s:sub(1, -5)
 		local o = dream:loadObject("objects/animations/" .. name)
-		data.animations[name] = o.animations.Default or o.animations.Armature
-		o:print()
+		local _, anim = next(o.animations)
+		data.animations[name] = anim
 	end
 end

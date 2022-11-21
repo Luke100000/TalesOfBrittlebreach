@@ -24,14 +24,15 @@ function e:draw()
 		pose = data.animations.standZombie:getPose(self.walkingAnimation)
 	end
 	
-	e.model.meshes.Cube.material:setColor(0.0, 0.0, 0.0)
-	e.model.meshes.Cube.material:setMetallic(0)
-	e.model.meshes.Cube.material:setRoughness(0.5)
-	e.model:applyPose(pose)
+	local mesh = e.model.objects.Armature.objects.Cube.meshes[1]
+	mesh.material:setColor(0.0, 0.0, 0.0)
+	mesh.material:setMetallic(0)
+	mesh.material:setRoughness(0.5)
+	e.model:getMainSkeleton():applyPose(pose)
+	e.model:translate(self.position)
 	e.model:resetTransform()
 	e.model:scale(1 / 75)
 	e.model:rotateY(self.rot - math.pi/2)
-	e.model:translate(self.position)
 	dream:draw(e.model)
 end
 

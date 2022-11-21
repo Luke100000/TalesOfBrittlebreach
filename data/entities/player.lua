@@ -1,8 +1,8 @@
 local e = extend("livingEntity")
 
-e.model = dream:loadObject("objects/player", {callback = function(model)
+e.model = dream:loadObject("objects/player", { callback = function(model)
 	model:setVertexShader("bones")
-end})
+end })
 
 function e:new(position)
 	e.super.new(self, position)
@@ -12,7 +12,7 @@ function e:new(position)
 	self.dialogueCameraBlend = 0
 	
 	self.torch = dream:newLight("point", vec3(1, 1, 1), vec3(1, 1, 0.2), 250)
-	self.torch:addShadow()
+	self.torch:addNewShadow()
 	self.torch.shadow:setSmooth(true)
 	self.torch.shadow:setStatic(true)
 	self.torch:setAttenuation(3)
@@ -20,7 +20,6 @@ end
 
 function e:draw()
 	local pose
-	
 	if self.speed > 0.1 then
 		pose = data.animations.walkPlayer:getPose(self.walkingAnimation)
 	else
@@ -29,28 +28,28 @@ function e:draw()
 	
 	self.rot = self.lookDirection
 	
-	e.model.meshes.Cube.material:setColor(1, 0, 0)
-	e.model.meshes.Cube.material:setMetallic(1)
-	e.model.meshes.Cube.material:setRoughness(0.5)
-	e.model:applyPose(pose)
+	local mesh = e.model.objects.Armature.objects.Cube.meshes[1]
+	mesh.material:setColor(1, 0, 0)
+	mesh.material:setMetallic(1)
+	mesh.material:setRoughness(0.5)
+	e.model:getMainSkeleton():applyPose(pose)
 	e.model:resetTransform()
-	e.model:scale(1 / 100)
-	e.model:rotateY(self.rot - math.pi/2)
 	e.model:translate(self.position)
+	e.model:rotateY(self.rot - math.pi / 2)
 	dream:draw(e.model)
 	
 	local dist = 0
 	self.torch:setPosition(self.position + vec3(
-		math.cos(self.rot) * dist,
-		1.5,
-		math.sin(self.rot) * dist
+			math.cos(self.rot) * dist,
+			1.5,
+			math.sin(self.rot) * dist
 	))
 	dream:addLight(self.torch)
 	
 	local item = states.game.inventory[states.game.selected]
 	if item then
-		local transform = e.model.skeleton:getTransform("mixamorig_RightHand")
-		self.weaponTransform = e.model.transform * transform * mat4:getScale(100) * mat4:getRotateY(math.pi/2) * mat4:getRotateX(-math.pi/2)
+		local transform = e.model:getMainSkeleton():getTransform("mixamorig_RightHand")
+		self.weaponTransform = (e.model.transform * transform):rotateY(-math.pi / 2):rotateX(-math.pi / 2)
 		item:drawEquipped(self.weaponTransform)
 	end
 	
@@ -65,28 +64,34 @@ end
 
 function e:control(dt)
 	local d = love.keyboard.isDown
-	local speed = 0.005
 	local rot = 0
 	
-	local cx, cy = 0, 0
+	local ax, az = 0, 0
 	if d("w") then
-		cx = 1
+		ax = 1
 	end
 	if d("d") then
-		cy = 1
+		az = 1
 	end
 	if d("s") then
-		cx = -1
+		ax = -1
 	end
 	if d("a") then
-		cy = -1
+		az = -1
 	end
-	local v = math.sqrt(cx^2 + cy^2)
-	if v > 0 then
-		states.game:applyForce(self,
-			cx * speed / v,
-			cy * speed / v
-		)
+	local a = math.sqrt(ax ^ 2 + az ^ 2)
+	if a > 0 then
+		ax = ax / a
+		az = az / a
+		
+		local v = self.velocity
+		local speed = vec3(v.x, 0, v.z):length()
+		local maxSpeed = love.keyboard.isDown("lshift") and 6 or 3
+		local dot = speed > 0 and (ax * v.x / speed + az * v.z / speed) or 0
+		local accel = 1000 * math.max(0, 1 - speed / maxSpeed * math.abs(dot))
+		accel = 3
+		
+		states.game:applyForce(self, ax * accel, az * accel)
 	end
 	
 	--camera
@@ -97,7 +102,7 @@ function e:control(dt)
 	local direction = vec3(-math.cos(rot) * tilt, 1, -math.sin(rot) * tilt):normalize()
 	local cameraRay = direction * (distance + safetyMargin)
 	
-	--request collison check
+	--request collision check
 	--states.game:requestRaytrace("camera", headPosition, cameraRay)
 	local pos = states.game.raytracerResults["camera"]
 	if pos and pos.pos then
@@ -119,8 +124,8 @@ function e:control(dt)
 		self.dialogueCameraBlend = math.max(0, self.dialogueCameraBlend - dt * 3)
 	end
 	
-	dream.cam:setTransform(
-		dream:lookAt(headPosition + direction * distance, headPosition):invert()
+	dream.camera:setTransform(
+			dream:lookAt(headPosition + direction * distance, headPosition):invert()
 	)
 end
 

@@ -10,7 +10,7 @@ function e:use(entity)
 	if not self.lastUse or (states.game.time - self.lastUse) > 0.5 then
 		self.lastUse = states.game.time
 		local direction = states.game:getShootingDirection(entity)
-		states.game:newBullet("arrow", entity.weaponTransform * vec3(0.8, 0, 0), direction:normalize(), entity)
+		states.game:newBullet("arrow", entity.weaponTransform * vec3(-0.8, 0, 0), direction:normalize(), entity)
 		soundManager:play("crossbow")
 	end
 end
@@ -24,8 +24,8 @@ end
 
 function e:draw()
 	e.model:resetTransform()
-	e.model:rotateY(states.game.time)
 	e.model:translate(self.position + vec3(0, math.cos(states.game.time) * 0.1, 0))
+	e.model:rotateY(states.game.time)
 	dream:draw(e.model)
 	
 	e.super.draw(self)

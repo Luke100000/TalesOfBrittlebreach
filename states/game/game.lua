@@ -9,12 +9,11 @@ require("states/game/pathfinder")
 require("states/game/physics")
 
 world = dream:loadScene("objects/world")
-world:print()
 
 states.game:loadRaytraceObject("objects/world")
 states.game:loadPhysicsObject("objects/world")
 
-cameraController = require("states/game/cameraController")
+cameraController = require("extensions/utils/cameraController")
 
 dream:setSky(love.graphics.newImage("textures/hdri.jpg"), 0.1)
 
@@ -29,20 +28,20 @@ function states.game:switch()
 	self.entities = { }
 	self.items = { }
 	
-	self.player = self:newEntity("player", world.objects.spawn.transform * world.objects.spawn.positions[1].position)
+	self.player = self:newEntity("player", world.objects.spawn:getTransform() * world.objects.spawn.positions.POS_spawn.position)
 	
 	self.itemPositions = { }
-	for d,s in pairs({"musket", "crossbow", "ammo", "gold"}) do
-		for i,v in ipairs(world.objects[s].positions) do
-			local p = world.objects[s].transform * v.position
+	for _, s in pairs({ "musket", "crossbow", "ammo", "gold" }) do
+		for _, v in pairs(world.objects[s].positions) do
+			local p = v.position
 			self:newItem(s, p)
 			self.itemPositions[s] = p
 		end
 	end
 	
-	for d,s in pairs({"trader", "shotgun"}) do
-		for i,v in ipairs(world.objects[s].positions) do
-			local p = world.objects[s].transform * v.position
+	for _, s in pairs({ "trader", "shotgun" }) do
+		for _, v in pairs(world.objects[s].positions) do
+			local p = v.position
 			self.itemPositions[s] = p
 		end
 	end
@@ -50,7 +49,7 @@ function states.game:switch()
 	self:spawnHorde(0.25)
 	
 	self.lights = { }
-	for d,s in pairs(world.lights) do
+	for _, s in pairs(world.lights) do
 		local s = s:clone()
 		table.insert(self.lights, s)
 		s:addShadow()
@@ -59,13 +58,13 @@ function states.game:switch()
 		s:setAttenuation(3)
 	end
 	
-	for i,v in pairs(world.objects) do
-		for d,s in pairs(v.lights) do
+	for _, v in pairs(world.objects) do
+		for _, s in pairs(v.lights) do
 			local s = s:clone()
 			table.insert(self.lights, s)
 			s:addShadow()
 			s:setBrightness(20)
-			s:setPosition(v.transform * s.pos)
+			s:setPosition(s.position)
 			s.shadow:setStatic(true)
 			s.shadow:setSmooth(true)
 			s:setAttenuation(3)
@@ -93,10 +92,10 @@ end
 
 function states.game:openDialogue(text, positions)
 	if type(text) == "string" then
-		text = {text}
+		text = { text }
 	end
 	if positions and type(positions[1]) == "number" then
-		positions = {positions}
+		positions = { positions }
 	end
 	local position
 	for i = 1, #text do
@@ -110,18 +109,18 @@ end
 
 function states.game:draw()
 	if self.freeFly then
-		cameraController:setCamera(dream.cam)
+		cameraController:setCamera(dream.camera)
 	end
 	
 	dream:prepare()
 	
 	local distance = 18
 	table.sort(self.lights, function(a, b)
-		a.dist = (a.pos - self.player.position):length()
-		b.dist = (b.pos - self.player.position):length()
+		a.dist = (a.position - self.player.position):length()
+		b.dist = (b.position - self.player.position):length()
 		return a.dist < b.dist
 	end)
-	for d,s in ipairs(self.lights) do
+	for _, s in ipairs(self.lights) do
 		if s.dist < distance then
 			s.originalBrightness = s.originalBrightness or s.brightness
 			s.brightness = s.originalBrightness * math.min(1, distance - s.dist)
@@ -174,7 +173,7 @@ function states.game:draw()
 	end
 	
 	--pickup items
-	for d,s in ipairs(self.items) do
+	for d, s in ipairs(self.items) do
 		if (s.position - self.player.position):lengthSquared() < 10 then
 			love.graphics.push()
 			love.graphics.translate(260, 400)
@@ -208,7 +207,7 @@ function states.game:draw()
 		end
 		
 		--items
-		for d,s in ipairs(self.inventory) do
+		for d, s in ipairs(self.inventory) do
 			love.graphics.push()
 			love.graphics.translate(w - 100, h - 40 * (#self.inventory - d + 1))
 			love.graphics.setColor(0, 0, 0, 0.5)
@@ -230,20 +229,20 @@ function states.game:draw()
 	love.graphics.pop()
 	
 	
---	local path = self.entities[2].path
---	if path then
---		local positions = { }
---		for d,s in ipairs(path) do
---			local pixel = dream.cam.transformProj * vec3(s[1], 0, s[2])
---			pixel = (pixel / pixel.z + 1.0) / 2 * vec3(screen.w, screen.h, self.player.position.y)
---			table.insert(positions, pixel.x)
---			table.insert(positions, pixel.y)
---		end
---		if #positions > 2 then
---			love.graphics.setLineWidth(2)
---			love.graphics.line(positions)
---		end
---	end
+	--	local path = self.entities[2].path
+	--	if path then
+	--		local positions = { }
+	--		for d,s in ipairs(path) do
+	--			local pixel = dream.cam.transformProj * vec3(s[1], 0, s[2])
+	--			pixel = (pixel / pixel.z + 1.0) / 2 * vec3(screen.w, screen.h, self.player.position.y)
+	--			table.insert(positions, pixel.x)
+	--			table.insert(positions, pixel.y)
+	--		end
+	--		if #positions > 2 then
+	--			love.graphics.setLineWidth(2)
+	--			love.graphics.line(positions)
+	--		end
+	--	end
 	
 	if love.keyboard.isDown("f1") then
 		love.graphics.setColor(1, 1, 1)
@@ -310,11 +309,10 @@ function states.game:update(dt)
 		self:updatePhysics(dt)
 		
 		local x, y = love.mouse.getPosition()
-		local entity = states.game:findNearestEntity(self.player.position, function(s) return s ~= self.player end)
 		local direction = vec3(
-			screen.h / 2 - y,
-			0,
-			x - screen.w / 2
+				screen.h / 2 - y,
+				0,
+				x - screen.w / 2
 		)
 		self.player.lookDirection = math.atan2(direction.z, direction.x)
 	end
@@ -331,9 +329,9 @@ function states.game:spawnHorde(chance)
 		"goldenZombie",
 		"blackZombie",
 	}
-	for _,pos in pairs(world.objects.spawner.positions) do
+	for _, pos in pairs(world.objects.spawner.positions) do
 		if math.random() < chance then
-			self:newEntity(zombies[math.random(1, #zombies)], world.objects.spawner.transform * pos.position)
+			self:newEntity(zombies[math.random(1, #zombies)], pos.position)
 		end
 	end
 end
@@ -341,16 +339,16 @@ end
 function states.game:getShootingDirection(entity)
 	local x, y = love.mouse.getPosition()
 	local direction = vec3(
-		screen.h / 2 - y,
-		0,
-		x - screen.w / 2
+			screen.h / 2 - y,
+			0,
+			x - screen.w / 2
 	)
 	direction = direction:normalize()
 	
 	local e = states.game:findNearestEntity(entity.position, function(s) return s ~= entity end)
 	if e then
 		local diff = e.position - entity.position
-		direction[2] = diff.y / math.sqrt(diff.x^2 + diff.y^2)
+		direction[2] = diff.y / math.sqrt(diff.x ^ 2 + diff.y ^ 2)
 	end
 	return direction
 end
@@ -385,7 +383,7 @@ function states.game:keypressed(key)
 	if key == "return" then
 		self.player.torch.shadow = nil
 		
-		dream.renderSet:setMode("direct")
+		dream.canvases:setMode("direct")
 		dream:init()
 	end
 end

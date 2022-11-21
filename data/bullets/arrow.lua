@@ -10,8 +10,9 @@ function e:new(position, direction, shooter)
 end
 
 function e:draw()
-	e.model:setDirection(self.direction)
+	e.model:resetTransform()
 	e.model:translate(self.position)
+	e.model:lookTowards(self.direction)
 	dream:draw(e.model)
 end
 
